@@ -110,7 +110,7 @@
       width: 100%;
       text-align: left;
       margin: 0 0 6px 0;
-      padding: 10px 10px;
+      padding: 10px;
       box-sizing: border-box;
       border: 1px solid #333;
       border-radius: 6px;
@@ -161,10 +161,6 @@
       cursor: default;
     }
 
-    input[type="checkbox"] {
-      transform: translateY(1px);
-    }
-
     #coords {
       margin-left: auto;
       font-family: monospace;
@@ -206,12 +202,13 @@
       color: #ffd36b;
     }
 
-    .leaflet-image-layer {
+    .leaflet-image-layer,
+    .leaflet-pane img {
       image-rendering: crisp-edges !important;
       image-rendering: pixelated !important;
     }
 
-    .leaflet-pane img {
+    .pixelated-icon {
       image-rendering: crisp-edges !important;
       image-rendering: pixelated !important;
     }
@@ -220,21 +217,10 @@
       background: #000;
     }
 
-    .pixelated-icon {
-      image-rendering: crisp-edges;
-      image-rendering: pixelated;
-    }
-
     .leaflet-popup-content-wrapper,
     .leaflet-popup-tip {
       background: #1f1f1f;
       color: white;
-    }
-
-    .leaflet-popup-content {
-      margin: 10px 12px;
-      font-size: 13px;
-      line-height: 1.4;
     }
 
     @media (max-width: 1000px) {
@@ -259,6 +245,7 @@
       <a href="./index.html">← Wiki</a>
 
       <label for="floorSelect">Floor:</label>
+
       <select id="floorSelect"></select>
 
       <button id="prevFloor">-</button>
@@ -279,16 +266,24 @@
     <div id="coords">
       x: -, y: -, z: -
     </div>
+
   </div>
 
+
   <div id="layout">
+
     <div id="map"></div>
 
     <aside id="sidePanel">
+
       <div id="panelHeader">
-        <div id="panelTitle">Mining filters</div>
+
+        <div id="panelTitle">
+          Mining filters
+        </div>
 
         <div id="panelControls">
+
           <label>
             <input
               type="checkbox"
@@ -301,12 +296,17 @@
           <div id="lavaCount">
             Lava holes: 0
           </div>
+
         </div>
+
       </div>
 
       <div id="coordList"></div>
+
     </aside>
+
   </div>
+
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -342,7 +342,9 @@
     const lavaCount =
       document.getElementById("lavaCount");
 
-    const MAP_VERSION = "20260905-8";
+
+    const MAP_VERSION = "20260905-7";
+
 
     const LAVA_HOLES = [
       { x: 32597, y: 32619, z: 14 },
@@ -376,8 +378,10 @@
       { x: 32628, y: 32661, z: 15 }
     ];
 
+
     function getRashidCity() {
-      const day = new Date().getDay();
+      const day =
+        new Date().getDay();
 
       const schedule = {
         0: "Carlin",
@@ -392,37 +396,51 @@
       return schedule[day] || "-";
     }
 
+
     function updateRashid() {
       rashidText.textContent =
         `Today Rashid is in: ${getRashidCity()}`;
     }
 
+
     function getFloorMeta(z) {
       return meta.floors[String(z)];
     }
 
+
     function getBounds(z) {
-      const floor = getFloorMeta(z);
+      const floor =
+        getFloorMeta(z);
 
       return [
         [0, 0],
-        [floor.height, floor.width]
+        [
+          floor.height,
+          floor.width
+        ]
       ];
     }
+
 
     function applyPixelRendering() {
       if (!overlay) return;
 
-      const image = overlay.getElement();
+      const image =
+        overlay.getElement();
+
       if (!image) return;
 
-      image.style.imageRendering = "pixelated";
-      image.style.transition = "none";
-      image.style.willChange = "transform";
+      image.style.imageRendering =
+        "pixelated";
+
+      image.style.transition =
+        "none";
     }
 
+
     function updateFloorButtons() {
-      const index = floors.indexOf(currentFloor);
+      const index =
+        floors.indexOf(currentFloor);
 
       prevFloorButton.disabled =
         index === floors.length - 1;
@@ -431,19 +449,11 @@
         index === 0;
     }
 
-    function gameToPixel(x, y, z) {
-      const floor = getFloorMeta(z);
-
-      if (!floor) return null;
-
-      return {
-        px: x - floor.min_x,
-        py: y - floor.min_y
-      };
-    }
 
     function isInsideFloor(x, y, z) {
-      const floor = getFloorMeta(z);
+      const floor =
+        getFloorMeta(z);
+
       if (!floor) return false;
 
       return (
@@ -454,187 +464,99 @@
       );
     }
 
-    function centerOnGameCoordinate(x, y, z, zoom = 3) {
-      const pixel = gameToPixel(x, y, z);
-      if (!pixel) return;
 
-      if (
-        pixel.px < 0 ||
-        pixel.py < 0 ||
-        pixel.px >= getFloorMeta(z).width ||
-        pixel.py >= getFloorMeta(z).height
-      ) {
-        return;
+    /*
+      GAME COORD -> LEAFLET COORD
+
+      PNG:
+      Y rośnie w dół
+
+      Leaflet:
+      lat rośnie w górę
+
+      dlatego Y musi być odwrócone.
+    */
+    function gameToLeaflet(
+      x,
+      y,
+      z
+    ) {
+      const floor =
+        getFloorMeta(z);
+
+      if (!floor) {
+        return null;
       }
+
+      const pixelX =
+        x - floor.min_x;
+
+      const pixelY =
+        y - floor.min_y;
+
+      return {
+        lng:
+          pixelX + 0.5,
+
+        lat:
+          floor.height -
+          pixelY -
+          0.5
+      };
+    }
+
+
+    function centerOnGameCoordinate(
+      x,
+      y,
+      z,
+      zoom = 4
+    ) {
+      const point =
+        gameToLeaflet(
+          x,
+          y,
+          z
+        );
+
+      if (!point) return;
 
       map.setView(
-        [pixel.py + 0.5, pixel.px + 0.5],
-        Math.max(map.getZoom(), zoom),
-        { animate: false }
-      );
-    }
-
-    function loadFloor(z, fit = false, afterLoad = null) {
-      z = Number(z);
-
-      if (!meta.floors[String(z)]) {
-        console.warn(`Floor ${z} does not exist`);
-        return;
-      }
-
-      currentFloor = z;
-      floorSelect.value = String(currentFloor);
-
-      const floor = getFloorMeta(currentFloor);
-      const bounds = getBounds(currentFloor);
-
-      if (overlay) {
-        map.removeLayer(overlay);
-        overlay = null;
-      }
-
-      const imageUrl =
-        `./export/${floor.file}?v=${MAP_VERSION}`;
-
-      overlay = L.imageOverlay(
-        imageUrl,
-        bounds,
+        [
+          point.lat,
+          point.lng
+        ],
+        zoom,
         {
-          interactive: false,
-          opacity: 1
+          animate: false
         }
       );
-
-      overlay.addTo(map);
-
-      overlay.once("load", () => {
-        applyPixelRendering();
-        renderLavaHoles();
-
-        if (typeof afterLoad === "function") {
-          afterLoad();
-        }
-      });
-
-      overlay.once("error", error => {
-        console.error(
-          `Cannot load floor ${currentFloor}:`,
-          imageUrl,
-          error
-        );
-      });
-
-      setTimeout(applyPixelRendering, 0);
-
-      if (fit) {
-        map.fitBounds(bounds, {
-          animate: false
-        });
-      }
-
-      coords.textContent =
-        `x: -, y: -, z: ${currentFloor}`;
-
-      updateFloorButtons();
-      renderLavaHoleList();
     }
 
-    function goToLavaHole(entry) {
-      if (entry.z !== currentFloor) {
-        loadFloor(entry.z, false, () => {
-          centerOnGameCoordinate(
-            entry.x,
-            entry.y,
-            entry.z,
-            4
-          );
-          highlightListEntry(entry);
-        });
-      } else {
-        centerOnGameCoordinate(
-          entry.x,
-          entry.y,
-          entry.z,
-          4
-        );
-        highlightListEntry(entry);
-      }
-    }
-
-    function highlightListEntry(entry) {
-      const items =
-        coordList.querySelectorAll(".coordItem");
-
-      items.forEach(item => {
-        const same =
-          Number(item.dataset.x) === entry.x &&
-          Number(item.dataset.y) === entry.y &&
-          Number(item.dataset.z) === entry.z;
-
-        item.classList.toggle("active", same);
-      });
-    }
-
-    function renderLavaHoleList() {
-      coordList.innerHTML = "";
-
-      const enabled = toggleLavaHole.checked;
-
-      lavaCount.textContent =
-        `Lava holes: ${LAVA_HOLES.length}`;
-
-      if (!enabled) {
-        coordList.innerHTML = `
-          <div style="padding: 8px; color: #999; font-size: 13px;">
-            Lava hole filter is hidden.
-          </div>
-        `;
-        return;
-      }
-
-      const sorted = [...LAVA_HOLES].sort((a, b) => {
-        if (a.z !== b.z) return a.z - b.z;
-        if (a.y !== b.y) return a.y - b.y;
-        return a.x - b.x;
-      });
-
-      sorted.forEach((entry, index) => {
-        const btn = document.createElement("button");
-        btn.className = "coordItem";
-        btn.dataset.x = entry.x;
-        btn.dataset.y = entry.y;
-        btn.dataset.z = entry.z;
-
-        btn.innerHTML = `
-          <div class="coordLineTop">
-            Lava Hole #${index + 1}
-          </div>
-          <div class="coordLineBottom">
-            x: ${entry.x}, y: ${entry.y}, z: ${entry.z}
-          </div>
-        `;
-
-        btn.addEventListener("click", () => {
-          goToLavaHole(entry);
-        });
-
-        coordList.appendChild(btn);
-      });
-    }
 
     function createLavaHoleIcon() {
       return L.icon({
-        iconUrl: "./images/mining/lava_hole.png",
-        iconSize: [24, 24],
-        iconAnchor: [12, 12],
-        popupAnchor: [0, -8],
-        className: "pixelated-icon"
+        iconUrl:
+          "./images/mining/lava_hole.png",
+
+        iconSize:
+          [24, 24],
+
+        iconAnchor:
+          [12, 12],
+
+        popupAnchor:
+          [0, -10],
+
+        className:
+          "pixelated-icon"
       });
     }
 
+
     function renderLavaHoles() {
       if (!lavaHoleLayer) {
-        lavaHoleLayer = L.layerGroup().addTo(map);
+        return;
       }
 
       lavaHoleLayer.clearLayers();
@@ -643,50 +565,399 @@
         return;
       }
 
-      const icon = createLavaHoleIcon();
+      const icon =
+        createLavaHoleIcon();
+
 
       LAVA_HOLES
-        .filter(entry => entry.z === currentFloor)
-        .forEach(entry => {
-          if (!isInsideFloor(entry.x, entry.y, entry.z)) {
-            return;
+        .filter(
+          entry =>
+            entry.z === currentFloor
+        )
+        .forEach(
+          entry => {
+
+            if (
+              !isInsideFloor(
+                entry.x,
+                entry.y,
+                entry.z
+              )
+            ) {
+              return;
+            }
+
+
+            const point =
+              gameToLeaflet(
+                entry.x,
+                entry.y,
+                entry.z
+              );
+
+
+            if (!point) {
+              return;
+            }
+
+
+            const marker =
+              L.marker(
+                [
+                  point.lat,
+                  point.lng
+                ],
+                {
+                  icon: icon,
+                  zIndexOffset: 1000
+                }
+              );
+
+
+            marker.bindPopup(`
+              <strong>Lava Hole</strong>
+              <br>
+              x: ${entry.x}
+              <br>
+              y: ${entry.y}
+              <br>
+              z: ${entry.z}
+            `);
+
+
+            marker.on(
+              "click",
+              () => {
+                highlightListEntry(
+                  entry
+                );
+              }
+            );
+
+
+            lavaHoleLayer.addLayer(
+              marker
+            );
+
           }
-
-          const pixel = gameToPixel(
-            entry.x,
-            entry.y,
-            entry.z
-          );
-
-          if (!pixel) return;
-
-          const marker = L.marker(
-            [pixel.py + 0.5, pixel.px + 0.5],
-            { icon }
-          );
-
-          marker.bindPopup(`
-            <strong>Lava Hole</strong><br>
-            x: ${entry.x}<br>
-            y: ${entry.y}<br>
-            z: ${entry.z}
-          `);
-
-          marker.on("click", () => {
-            highlightListEntry(entry);
-          });
-
-          lavaHoleLayer.addLayer(marker);
-        });
+        );
     }
 
+
+    function highlightListEntry(entry) {
+      const items =
+        coordList.querySelectorAll(
+          ".coordItem"
+        );
+
+      items.forEach(
+        item => {
+
+          const same =
+            Number(item.dataset.x) === entry.x &&
+            Number(item.dataset.y) === entry.y &&
+            Number(item.dataset.z) === entry.z;
+
+          item.classList.toggle(
+            "active",
+            same
+          );
+
+        }
+      );
+    }
+
+
+    function goToLavaHole(entry) {
+      if (
+        entry.z !== currentFloor
+      ) {
+
+        loadFloor(
+          entry.z,
+          false,
+          () => {
+
+            centerOnGameCoordinate(
+              entry.x,
+              entry.y,
+              entry.z,
+              5
+            );
+
+            highlightListEntry(
+              entry
+            );
+
+          }
+        );
+
+      } else {
+
+        centerOnGameCoordinate(
+          entry.x,
+          entry.y,
+          entry.z,
+          5
+        );
+
+        highlightListEntry(
+          entry
+        );
+
+      }
+    }
+
+
+    function renderLavaHoleList() {
+      coordList.innerHTML = "";
+
+      lavaCount.textContent =
+        `Lava holes: ${LAVA_HOLES.length}`;
+
+
+      if (
+        !toggleLavaHole.checked
+      ) {
+
+        coordList.innerHTML = `
+          <div
+            style="
+              padding: 8px;
+              color: #999;
+              font-size: 13px;
+            "
+          >
+            Lava hole filter is hidden.
+          </div>
+        `;
+
+        return;
+      }
+
+
+      const sorted =
+        [...LAVA_HOLES]
+          .sort(
+            (a, b) => {
+
+              if (
+                a.z !== b.z
+              ) {
+                return a.z - b.z;
+              }
+
+              if (
+                a.y !== b.y
+              ) {
+                return a.y - b.y;
+              }
+
+              return a.x - b.x;
+
+            }
+          );
+
+
+      sorted.forEach(
+        (entry, index) => {
+
+          const btn =
+            document.createElement(
+              "button"
+            );
+
+
+          btn.className =
+            "coordItem";
+
+
+          btn.dataset.x =
+            entry.x;
+
+          btn.dataset.y =
+            entry.y;
+
+          btn.dataset.z =
+            entry.z;
+
+
+          btn.innerHTML = `
+            <div class="coordLineTop">
+              Lava Hole #${index + 1}
+            </div>
+
+            <div class="coordLineBottom">
+              x: ${entry.x},
+              y: ${entry.y},
+              z: ${entry.z}
+            </div>
+          `;
+
+
+          btn.addEventListener(
+            "click",
+            () => {
+
+              goToLavaHole(
+                entry
+              );
+
+            }
+          );
+
+
+          coordList.appendChild(
+            btn
+          );
+
+        }
+      );
+    }
+
+
+    function loadFloor(
+      z,
+      fit = false,
+      afterLoad = null
+    ) {
+      z = Number(z);
+
+
+      if (
+        !meta.floors[String(z)]
+      ) {
+        console.warn(
+          `Floor ${z} does not exist`
+        );
+
+        return;
+      }
+
+
+      currentFloor = z;
+
+      floorSelect.value =
+        String(currentFloor);
+
+
+      const floor =
+        getFloorMeta(
+          currentFloor
+        );
+
+
+      const bounds =
+        getBounds(
+          currentFloor
+        );
+
+
+      if (overlay) {
+        map.removeLayer(
+          overlay
+        );
+
+        overlay = null;
+      }
+
+
+      const imageUrl =
+        `./export/${floor.file}?v=${MAP_VERSION}`;
+
+
+      overlay =
+        L.imageOverlay(
+          imageUrl,
+          bounds,
+          {
+            interactive: false,
+            opacity: 1
+          }
+        );
+
+
+      overlay.addTo(
+        map
+      );
+
+
+      overlay.once(
+        "load",
+        () => {
+
+          applyPixelRendering();
+
+          renderLavaHoles();
+
+          if (
+            typeof afterLoad ===
+            "function"
+          ) {
+            afterLoad();
+          }
+
+        }
+      );
+
+
+      overlay.once(
+        "error",
+        error => {
+
+          console.error(
+            `Cannot load floor ${currentFloor}:`,
+            imageUrl,
+            error
+          );
+
+        }
+      );
+
+
+      setTimeout(
+        applyPixelRendering,
+        0
+      );
+
+
+      if (fit) {
+
+        map.fitBounds(
+          bounds,
+          {
+            animate: false
+          }
+        );
+
+      }
+
+
+      coords.textContent =
+        `x: -, y: -, z: ${currentFloor}`;
+
+
+      updateFloorButtons();
+
+      renderLavaHoles();
+
+      renderLavaHoleList();
+    }
+
+
     async function init() {
+
       updateRashid();
 
-      const response = await fetch(
-        `./export/map_info.json?v=${MAP_VERSION}`,
-        { cache: "no-store" }
-      );
+
+      const response =
+        await fetch(
+          `./export/map_info.json?v=${MAP_VERSION}`,
+          {
+            cache: "no-store"
+          }
+        );
+
 
       if (!response.ok) {
         throw new Error(
@@ -694,142 +965,340 @@
         );
       }
 
-      meta = await response.json();
 
-      floors = Object.keys(meta.floors)
-        .map(Number)
-        .sort((a, b) => a - b);
+      meta =
+        await response.json();
 
-      map = L.map("map", {
-        crs: L.CRS.Simple,
-        minZoom: -4,
-        maxZoom: 10,
-        zoomSnap: 1,
-        zoomDelta: 1,
-        wheelPxPerZoomLevel: 120,
-        zoomAnimation: false,
-        fadeAnimation: false,
-        markerZoomAnimation: false,
-        attributionControl: false
-      });
 
-      lavaHoleLayer = L.layerGroup().addTo(map);
+      floors =
+        Object.keys(meta.floors)
+          .map(Number)
+          .sort(
+            (a, b) => a - b
+          );
 
-      floors.forEach(z => {
-        const option =
-          document.createElement("option");
 
-        option.value = z;
-        option.textContent = `Floor ${z}`;
+      map =
+        L.map(
+          "map",
+          {
+            crs:
+              L.CRS.Simple,
 
-        floorSelect.appendChild(option);
-      });
+            minZoom:
+              -4,
+
+            maxZoom:
+              10,
+
+            zoomSnap:
+              1,
+
+            zoomDelta:
+              1,
+
+            wheelPxPerZoomLevel:
+              120,
+
+            zoomAnimation:
+              false,
+
+            fadeAnimation:
+              false,
+
+            markerZoomAnimation:
+              false,
+
+            attributionControl:
+              false
+          }
+        );
+
+
+      lavaHoleLayer =
+        L.layerGroup()
+          .addTo(map);
+
+
+      floors.forEach(
+        z => {
+
+          const option =
+            document.createElement(
+              "option"
+            );
+
+          option.value =
+            z;
+
+          option.textContent =
+            `Floor ${z}`;
+
+          floorSelect.appendChild(
+            option
+          );
+
+        }
+      );
+
 
       currentFloor =
         floors.includes(7)
           ? 7
           : floors[0];
 
-      floorSelect.value = String(currentFloor);
 
-      floorSelect.addEventListener("change", event => {
-        loadFloor(Number(event.target.value));
-      });
+      floorSelect.value =
+        String(currentFloor);
 
-      prevFloorButton.addEventListener("click", () => {
-        const index = floors.indexOf(currentFloor);
 
-        if (
-          index >= 0 &&
-          index < floors.length - 1
-        ) {
-          const newFloor = floors[index + 1];
-          loadFloor(newFloor);
+      floorSelect.addEventListener(
+        "change",
+        event => {
+
+          loadFloor(
+            Number(
+              event.target.value
+            )
+          );
+
         }
-      });
+      );
 
-      nextFloorButton.addEventListener("click", () => {
-        const index = floors.indexOf(currentFloor);
 
-        if (index > 0) {
-          const newFloor = floors[index - 1];
-          loadFloor(newFloor);
+      prevFloorButton.addEventListener(
+        "click",
+        () => {
+
+          const index =
+            floors.indexOf(
+              currentFloor
+            );
+
+
+          if (
+            index >= 0 &&
+            index <
+            floors.length - 1
+          ) {
+
+            loadFloor(
+              floors[
+                index + 1
+              ]
+            );
+
+          }
+
         }
-      });
+      );
 
-      toggleLavaHole.addEventListener("change", () => {
-        renderLavaHoles();
-        renderLavaHoleList();
-      });
 
-      map.on("mousemove", event => {
-        const floor = getFloorMeta(currentFloor);
+      nextFloorButton.addEventListener(
+        "click",
+        () => {
 
-        const pixelX = Math.floor(event.latlng.lng);
-        const pixelY = Math.floor(event.latlng.lat);
+          const index =
+            floors.indexOf(
+              currentFloor
+            );
 
-        if (
-          pixelX < 0 ||
-          pixelY < 0 ||
-          pixelX >= floor.width ||
-          pixelY >= floor.height
-        ) {
+
+          if (
+            index > 0
+          ) {
+
+            loadFloor(
+              floors[
+                index - 1
+              ]
+            );
+
+          }
+
+        }
+      );
+
+
+      toggleLavaHole.addEventListener(
+        "change",
+        () => {
+
+          renderLavaHoles();
+
+          renderLavaHoleList();
+
+        }
+      );
+
+
+      /*
+        POPRAWIONE WSPÓŁRZĘDNE MYSZY
+      */
+
+      map.on(
+        "mousemove",
+        event => {
+
+          const floor =
+            getFloorMeta(
+              currentFloor
+            );
+
+
+          const pixelX =
+            Math.floor(
+              event.latlng.lng
+            );
+
+
+          const pixelY =
+            Math.floor(
+              floor.height -
+              event.latlng.lat
+            );
+
+
+          if (
+            pixelX < 0 ||
+            pixelY < 0 ||
+            pixelX >= floor.width ||
+            pixelY >= floor.height
+          ) {
+
+            coords.textContent =
+              `x: -, y: -, z: ${currentFloor}`;
+
+            return;
+
+          }
+
+
+          const gameX =
+            floor.min_x +
+            pixelX;
+
+
+          const gameY =
+            floor.min_y +
+            pixelY;
+
+
           coords.textContent =
-            `x: -, y: -, z: ${currentFloor}`;
-          return;
+            `x: ${gameX}, y: ${gameY}, z: ${currentFloor}`;
+
         }
+      );
 
-        const gameX = floor.min_x + pixelX;
-        const gameY = floor.min_y + pixelY;
 
-        coords.textContent =
-          `x: ${gameX}, y: ${gameY}, z: ${currentFloor}`;
-      });
+      /*
+        POPRAWIONE WSPÓŁRZĘDNE KLIKNIĘCIA
+      */
 
-      map.on("click", event => {
-        const floor = getFloorMeta(currentFloor);
+      map.on(
+        "click",
+        event => {
 
-        const pixelX = Math.floor(event.latlng.lng);
-        const pixelY = Math.floor(event.latlng.lat);
+          const floor =
+            getFloorMeta(
+              currentFloor
+            );
 
-        if (
-          pixelX < 0 ||
-          pixelY < 0 ||
-          pixelX >= floor.width ||
-          pixelY >= floor.height
-        ) {
-          return;
+
+          const pixelX =
+            Math.floor(
+              event.latlng.lng
+            );
+
+
+          const pixelY =
+            Math.floor(
+              floor.height -
+              event.latlng.lat
+            );
+
+
+          if (
+            pixelX < 0 ||
+            pixelY < 0 ||
+            pixelX >= floor.width ||
+            pixelY >= floor.height
+          ) {
+            return;
+          }
+
+
+          const gameX =
+            floor.min_x +
+            pixelX;
+
+
+          const gameY =
+            floor.min_y +
+            pixelY;
+
+
+          console.log({
+            x: gameX,
+            y: gameY,
+            z: currentFloor
+          });
+
         }
+      );
 
-        const gameX = floor.min_x + pixelX;
-        const gameY = floor.min_y + pixelY;
 
-        console.log({
-          x: gameX,
-          y: gameY,
-          z: currentFloor
-        });
-      });
+      map.on(
+        "zoomend",
+        () => {
 
-      map.on("zoomend", () => {
-        applyPixelRendering();
-      });
+          applyPixelRendering();
+
+        }
+      );
+
 
       renderLavaHoleList();
-      loadFloor(currentFloor, true);
+
+
+      loadFloor(
+        currentFloor,
+        true
+      );
+
     }
 
-    init().catch(error => {
-      console.error(error);
 
-      document.getElementById("map").innerHTML = `
-        <div style="padding: 20px; color: red;">
-          Cannot load map.
-          <br><br>
-          ${error}
-        </div>
-      `;
-    });
+    init().catch(
+      error => {
+
+        console.error(
+          error
+        );
+
+
+        document
+          .getElementById(
+            "map"
+          )
+          .innerHTML = `
+            <div
+              style="
+                padding: 20px;
+                color: red;
+              "
+            >
+              Cannot load map.
+
+              <br><br>
+
+              ${error}
+            </div>
+          `;
+
+      }
+    );
   </script>
+
 </body>
 </html>
