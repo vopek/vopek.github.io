@@ -27,12 +27,17 @@
       height: 50px;
       display: flex;
       align-items: center;
-      gap: 12px;
       padding: 0 15px;
       box-sizing: border-box;
       background: #1a1a1a;
       position: relative;
       z-index: 1000;
+    }
+
+    #toolbarLeft {
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
 
     #map {
@@ -63,6 +68,7 @@
     #coords {
       margin-left: auto;
       font-family: monospace;
+      white-space: nowrap;
     }
 
     a {
@@ -72,6 +78,37 @@
 
     a:hover {
       text-decoration: underline;
+    }
+
+    #rashidInfo {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+
+      transform: translate(-50%, -50%);
+
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      font-weight: bold;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    #rashidSprite {
+      width: 32px;
+      height: 32px;
+
+      object-fit: contain;
+
+      image-rendering: crisp-edges;
+      image-rendering: pixelated;
+    }
+
+    #rashidText {
+      font-size: 14px;
+      color: #ffd36b;
     }
 
     .leaflet-image-layer {
@@ -87,36 +124,80 @@
     .leaflet-container {
       background: #000;
     }
+
+    @media (max-width: 800px) {
+      #rashidInfo {
+        display: none;
+      }
+    }
   </style>
 </head>
 
 <body>
 
   <div id="toolbar">
-    <a href="./index.html">← Wiki</a>
 
-    <label for="floorSelect">Floor:</label>
+    <div id="toolbarLeft">
 
-    <select id="floorSelect"></select>
+      <a href="./index.html">
+        ← Wiki
+      </a>
 
-    <button id="prevFloor">-</button>
-    <button id="nextFloor">+</button>
+      <label for="floorSelect">
+        Floor:
+      </label>
+
+      <select id="floorSelect"></select>
+
+      <button id="prevFloor">
+        -
+      </button>
+
+      <button id="nextFloor">
+        +
+      </button>
+
+    </div>
+
+
+    <div id="rashidInfo">
+
+      <img
+        id="rashidSprite"
+        src="./images/npc/rashid.gif"
+        alt="Rashid"
+      />
+
+      <div id="rashidText">
+        Today Rashid is in: -
+      </div>
+
+    </div>
+
 
     <div id="coords">
       x: -, y: -, z: -
     </div>
+
   </div>
+
 
   <div id="map"></div>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+  </script>
+
 
   <script>
+
     let map;
     let overlay;
     let meta;
     let currentFloor;
     let floors = [];
+
 
     const floorSelect =
       document.getElementById("floorSelect");
@@ -130,14 +211,59 @@
     const nextFloorButton =
       document.getElementById("nextFloor");
 
+    const rashidText =
+      document.getElementById("rashidText");
+
 
     /*
       Zmień po każdym nowym eksporcie map.
     */
-    const MAP_VERSION = "20260905-4";
+    const MAP_VERSION = "20260905-5";
+
+
+    /*
+      Rashid schedule:
+
+      Monday    - Thais
+      Tuesday   - Venore
+      Wednesday - Ab'Dendriel
+      Thursday  - Ankrahmun
+      Friday    - Darashia
+      Saturday  - Edron
+      Sunday    - Carlin
+    */
+    function getRashidCity() {
+
+      const day =
+        new Date().getDay();
+
+      const schedule = {
+        0: "Carlin",
+        1: "Thais",
+        2: "Venore",
+        3: "Ab'Dendriel",
+        4: "Ankrahmun",
+        5: "Darashia",
+        6: "Edron"
+      };
+
+      return schedule[day] || "-";
+
+    }
+
+
+    function updateRashid() {
+
+      rashidText.textContent =
+        `Today Rashid is in: ${getRashidCity()}`;
+
+    }
 
 
     async function init() {
+
+      updateRashid();
+
 
       const response = await fetch(
         `./export/map_info.json?v=${MAP_VERSION}`,
@@ -146,81 +272,102 @@
         }
       );
 
+
       if (!response.ok) {
+
         throw new Error(
           "Cannot load ./export/map_info.json"
         );
+
       }
 
-      meta = await response.json();
+
+      meta =
+        await response.json();
+
+
+      floors =
+        Object.keys(meta.floors)
+          .map(Number)
+          .sort((a, b) => a - b);
+
+
+      map = L.map(
+        "map",
+        {
+          crs: L.CRS.Simple,
+
+          minZoom: -4,
+          maxZoom: 10,
+
+          zoomSnap: 1,
+          zoomDelta: 1,
+
+          wheelPxPerZoomLevel: 120,
+
+          zoomAnimation: false,
+          fadeAnimation: false,
+          markerZoomAnimation: false,
+
+          attributionControl: false
+        }
+      );
 
 
       /*
-        Sortowanie floorów rosnąco:
-
-        0, 1, 2, ...
-        15, 16
+        Floor dropdown.
       */
-      floors = Object.keys(meta.floors)
-        .map(Number)
-        .sort((a, b) => a - b);
 
+      floors.forEach(
+        z => {
 
-      map = L.map("map", {
-        crs: L.CRS.Simple,
+          const option =
+            document.createElement(
+              "option"
+            );
 
-        minZoom: -4,
-        maxZoom: 10,
+          option.value =
+            z;
 
-        zoomSnap: 1,
-        zoomDelta: 1,
+          option.textContent =
+            `Floor ${z}`;
 
-        wheelPxPerZoomLevel: 120,
+          floorSelect.appendChild(
+            option
+          );
 
-        zoomAnimation: false,
-        fadeAnimation: false,
-        markerZoomAnimation: false,
-
-        attributionControl: false
-      });
+        }
+      );
 
 
       /*
-        Dropdown.
+        Start floor = 7.
       */
-      floors.forEach(z => {
 
-        const option =
-          document.createElement("option");
-
-        option.value = z;
-        option.textContent = `Floor ${z}`;
-
-        floorSelect.appendChild(option);
-
-      });
-
-
-      /*
-        Start na floor 7,
-        jeśli istnieje.
-      */
       currentFloor =
         floors.includes(7)
           ? 7
           : floors[0];
+
 
       floorSelect.value =
         String(currentFloor);
 
 
       function getFloorMeta(z) {
-        return meta.floors[String(z)];
+
+        return meta.floors[
+          String(z)
+        ];
+
       }
 
 
       function getBounds(z) {
-        const floor = getFloorMeta(z);
+
+        const floor =
+          getFloorMeta(z);
+
 
         return [
           [0, 0],
@@ -229,6 +376,7 @@
             floor.width
           ]
         ];
+
       }
 
 
@@ -238,12 +386,15 @@
           return;
         }
 
+
         const image =
           overlay.getElement();
+
 
         if (!image) {
           return;
         }
+
 
         image.style.imageRendering =
           "pixelated";
@@ -253,37 +404,34 @@
 
         image.style.willChange =
           "transform";
+
       }
 
 
-      /*
-        Blokowanie przycisków
-        na skrajnych floorach.
-
-        Tibia:
-        + = wyżej = mniejsze z
-        - = niżej = większe z
-      */
       function updateFloorButtons() {
 
         const index =
-          floors.indexOf(currentFloor);
+          floors.indexOf(
+            currentFloor
+          );
+
 
         /*
-          "-" schodzi niżej,
-          więc przy maksymalnym z
-          już nie może dalej.
+          "-" = down
+          higher Z
         */
         prevFloorButton.disabled =
-          index === floors.length - 1;
+          index ===
+          floors.length - 1;
+
 
         /*
-          "+" idzie wyżej,
-          więc przy z=0
-          już nie może dalej.
+          "+" = up
+          lower Z
         */
         nextFloorButton.disabled =
           index === 0;
+
       }
 
 
@@ -292,34 +440,43 @@
         fit = false
       ) {
 
-        z = Number(z);
+        z =
+          Number(z);
 
 
-        /*
-          Zabezpieczenie przed undefined
-          / nieistniejącym floorem.
-        */
-        if (!meta.floors[String(z)]) {
+        if (
+          !meta.floors[
+            String(z)
+          ]
+        ) {
 
           console.warn(
             `Floor ${z} does not exist`
           );
 
           return;
+
         }
 
 
-        currentFloor = z;
+        currentFloor =
+          z;
+
 
         floorSelect.value =
           String(currentFloor);
 
 
         const floor =
-          getFloorMeta(currentFloor);
+          getFloorMeta(
+            currentFloor
+          );
+
 
         const bounds =
-          getBounds(currentFloor);
+          getBounds(
+            currentFloor
+          );
 
 
         if (overlay) {
@@ -328,7 +485,8 @@
             overlay
           );
 
-          overlay = null;
+          overlay =
+            null;
 
         }
 
@@ -344,17 +502,20 @@
         );
 
 
-        overlay = L.imageOverlay(
-          imageUrl,
-          bounds,
-          {
-            interactive: false,
-            opacity: 1
-          }
+        overlay =
+          L.imageOverlay(
+            imageUrl,
+            bounds,
+            {
+              interactive: false,
+              opacity: 1
+            }
+          );
+
+
+        overlay.addTo(
+          map
         );
-
-
-        overlay.addTo(map);
 
 
         overlay.once(
@@ -408,12 +569,14 @@
 
 
         updateFloorButtons();
+
       }
 
 
       /*
-        Zmiana floora przez select.
+        Select floor.
       */
+
       floorSelect.addEventListener(
         "change",
         event => {
@@ -431,29 +594,34 @@
       /*
         "-"
 
-        Tibia:
-        większe z = niżej
-
+        down:
         7 -> 8
         8 -> 9
         ...
         15 -> 16
       */
+
       prevFloorButton.addEventListener(
         "click",
         () => {
 
           const index =
-            floors.indexOf(currentFloor);
+            floors.indexOf(
+              currentFloor
+            );
 
 
           if (
             index >= 0 &&
-            index < floors.length - 1
+            index <
+            floors.length - 1
           ) {
 
             const newFloor =
-              floors[index + 1];
+              floors[
+                index + 1
+              ];
+
 
             loadFloor(
               newFloor
@@ -468,26 +636,32 @@
       /*
         "+"
 
-        Tibia:
-        mniejsze z = wyżej
-
+        up:
         7 -> 6
         6 -> 5
         ...
         1 -> 0
       */
+
       nextFloorButton.addEventListener(
         "click",
         () => {
 
           const index =
-            floors.indexOf(currentFloor);
+            floors.indexOf(
+              currentFloor
+            );
 
 
-          if (index > 0) {
+          if (
+            index > 0
+          ) {
 
             const newFloor =
-              floors[index - 1];
+              floors[
+                index - 1
+              ];
+
 
             loadFloor(
               newFloor
@@ -500,20 +674,24 @@
 
 
       /*
-        Współrzędne pod kursorem.
+        Mouse coordinates.
       */
+
       map.on(
         "mousemove",
         event => {
 
           const floor =
-            getFloorMeta(currentFloor);
+            getFloorMeta(
+              currentFloor
+            );
 
 
           const pixelX =
             Math.floor(
               event.latlng.lng
             );
+
 
           const pixelY =
             Math.floor(
@@ -532,12 +710,14 @@
               `x: -, y: -, z: ${currentFloor}`;
 
             return;
+
           }
 
 
           const gameX =
             floor.min_x +
             pixelX;
+
 
           const gameY =
             floor.min_y +
@@ -552,20 +732,24 @@
 
 
       /*
-        Kliknięcie na mapę.
+        Click coordinates.
       */
+
       map.on(
         "click",
         event => {
 
           const floor =
-            getFloorMeta(currentFloor);
+            getFloorMeta(
+              currentFloor
+            );
 
 
           const pixelX =
             Math.floor(
               event.latlng.lng
             );
+
 
           const pixelY =
             Math.floor(
@@ -579,7 +763,9 @@
             pixelX >= floor.width ||
             pixelY >= floor.height
           ) {
+
             return;
+
           }
 
 
@@ -587,16 +773,19 @@
             floor.min_x +
             pixelX;
 
+
           const gameY =
             floor.min_y +
             pixelY;
 
 
-          console.log({
-            x: gameX,
-            y: gameY,
-            z: currentFloor
-          });
+          console.log(
+            {
+              x: gameX,
+              y: gameY,
+              z: currentFloor
+            }
+          );
 
         }
       );
@@ -615,33 +804,49 @@
       /*
         Start.
       */
+
       loadFloor(
         currentFloor,
         true
       );
+
     }
 
 
-    init().catch(error => {
+    init().catch(
+      error => {
 
-      console.error(error);
+        console.error(
+          error
+        );
 
-      document.getElementById(
-        "map"
-      ).innerHTML = `
-        <div style="
-          padding: 20px;
-          color: red;
-        ">
-          Cannot load map.
 
-          <br><br>
+        document
+          .getElementById(
+            "map"
+          )
+          .innerHTML = `
 
-          ${error}
-        </div>
-      `;
+            <div
+              style="
+                padding: 20px;
+                color: red;
+              "
+            >
 
-    });
+              Cannot load map.
+
+              <br><br>
+
+              ${error}
+
+            </div>
+
+          `;
+
+      }
+    );
+
   </script>
 
 </body>
