@@ -55,6 +55,11 @@
       background: #333;
     }
 
+    button:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+
     #coords {
       margin-left: auto;
       font-family: monospace;
@@ -111,26 +116,29 @@
     let overlay;
     let meta;
     let currentFloor;
+    let floors = [];
 
-    const floorSelect = document.getElementById("floorSelect");
-    const coords = document.getElementById("coords");
+    const floorSelect =
+      document.getElementById("floorSelect");
+
+    const coords =
+      document.getElementById("coords");
+
+    const prevFloorButton =
+      document.getElementById("prevFloor");
+
+    const nextFloorButton =
+      document.getElementById("nextFloor");
+
 
     /*
-      ZMIEŃ TĘ WARTOŚĆ po każdym nowym eksporcie PNG.
-
-      Np.
-      20260905-1
-      20260905-2
-      20260906-1
+      Zmień po każdym nowym eksporcie map.
     */
-    const MAP_VERSION = "20260905-3";
+    const MAP_VERSION = "20260905-4";
 
 
     async function init() {
 
-      /*
-        Cache-busting również dla map_info.json.
-      */
       const response = await fetch(
         `./export/map_info.json?v=${MAP_VERSION}`,
         {
@@ -147,7 +155,13 @@
       meta = await response.json();
 
 
-      const floors = Object.keys(meta.floors)
+      /*
+        Sortowanie floorów rosnąco:
+
+        0, 1, 2, ...
+        15, 16
+      */
+      floors = Object.keys(meta.floors)
         .map(Number)
         .sort((a, b) => a - b);
 
@@ -172,24 +186,32 @@
 
 
       /*
-        Dodawanie floorów do selecta.
+        Dropdown.
       */
       floors.forEach(z => {
-        const option = document.createElement("option");
+
+        const option =
+          document.createElement("option");
 
         option.value = z;
         option.textContent = `Floor ${z}`;
 
         floorSelect.appendChild(option);
+
       });
 
 
+      /*
+        Start na floor 7,
+        jeśli istnieje.
+      */
       currentFloor =
         floors.includes(7)
           ? 7
           : floors[0];
 
-      floorSelect.value = currentFloor;
+      floorSelect.value =
+        String(currentFloor);
 
 
       function getFloorMeta(z) {
@@ -202,25 +224,66 @@
 
         return [
           [0, 0],
-          [floor.height, floor.width]
+          [
+            floor.height,
+            floor.width
+          ]
         ];
       }
 
 
       function applyPixelRendering() {
+
         if (!overlay) {
           return;
         }
 
-        const image = overlay.getElement();
+        const image =
+          overlay.getElement();
 
         if (!image) {
           return;
         }
 
-        image.style.imageRendering = "pixelated";
-        image.style.transition = "none";
-        image.style.willChange = "transform";
+        image.style.imageRendering =
+          "pixelated";
+
+        image.style.transition =
+          "none";
+
+        image.style.willChange =
+          "transform";
+      }
+
+
+      /*
+        Blokowanie przycisków
+        na skrajnych floorach.
+
+        Tibia:
+        + = wyżej = mniejsze z
+        - = niżej = większe z
+      */
+      function updateFloorButtons() {
+
+        const index =
+          floors.indexOf(currentFloor);
+
+        /*
+          "-" schodzi niżej,
+          więc przy maksymalnym z
+          już nie może dalej.
+        */
+        prevFloorButton.disabled =
+          index === floors.length - 1;
+
+        /*
+          "+" idzie wyżej,
+          więc przy z=0
+          już nie może dalej.
+        */
+        nextFloorButton.disabled =
+          index === 0;
       }
 
 
@@ -228,33 +291,58 @@
         z,
         fit = false
       ) {
-        currentFloor = Number(z);
 
-        const floor = getFloorMeta(currentFloor);
-        const bounds = getBounds(currentFloor);
+        z = Number(z);
 
-        if (overlay) {
-          map.removeLayer(overlay);
-          overlay = null;
-        }
 
         /*
-          KLUCZOWA ZMIANA:
-
-          ?v=MAP_VERSION powoduje, że GitHub Pages /
-          przeglądarka potraktują obraz jako nowy URL.
-
-          np.
-          floor_7.png?v=20260905-2
+          Zabezpieczenie przed undefined
+          / nieistniejącym floorem.
         */
+        if (!meta.floors[String(z)]) {
+
+          console.warn(
+            `Floor ${z} does not exist`
+          );
+
+          return;
+        }
+
+
+        currentFloor = z;
+
+        floorSelect.value =
+          String(currentFloor);
+
+
+        const floor =
+          getFloorMeta(currentFloor);
+
+        const bounds =
+          getBounds(currentFloor);
+
+
+        if (overlay) {
+
+          map.removeLayer(
+            overlay
+          );
+
+          overlay = null;
+
+        }
+
+
         const imageUrl =
           `./export/${floor.file}?v=${MAP_VERSION}`;
+
 
         console.log(
           "Loading floor:",
           currentFloor,
           imageUrl
         );
+
 
         overlay = L.imageOverlay(
           imageUrl,
@@ -265,17 +353,20 @@
           }
         );
 
+
         overlay.addTo(map);
 
 
         overlay.once(
           "load",
           () => {
+
             applyPixelRendering();
 
             console.log(
               `Loaded floor ${currentFloor}`
             );
+
           }
         );
 
@@ -283,11 +374,13 @@
         overlay.once(
           "error",
           error => {
+
             console.error(
               `Cannot load floor ${currentFloor}:`,
               imageUrl,
               error
             );
+
           }
         );
 
@@ -299,80 +392,123 @@
 
 
         if (fit) {
+
           map.fitBounds(
             bounds,
             {
               animate: false
             }
           );
+
         }
 
 
         coords.textContent =
           `x: -, y: -, z: ${currentFloor}`;
+
+
+        updateFloorButtons();
       }
 
 
+      /*
+        Zmiana floora przez select.
+      */
       floorSelect.addEventListener(
         "change",
         event => {
+
           loadFloor(
-            Number(event.target.value)
+            Number(
+              event.target.value
+            )
           );
+
         }
       );
 
 
-      document
-        .getElementById("prevFloor")
-        .addEventListener(
-          "click",
-          () => {
-            const index =
-              floors.indexOf(currentFloor);
+      /*
+        "-"
 
-            if (index > 0) {
-              const newFloor =
-                floors[index + 1];
+        Tibia:
+        większe z = niżej
 
-              floorSelect.value =
-                newFloor;
+        7 -> 8
+        8 -> 9
+        ...
+        15 -> 16
+      */
+      prevFloorButton.addEventListener(
+        "click",
+        () => {
 
-              loadFloor(newFloor);
-            }
+          const index =
+            floors.indexOf(currentFloor);
+
+
+          if (
+            index >= 0 &&
+            index < floors.length - 1
+          ) {
+
+            const newFloor =
+              floors[index + 1];
+
+            loadFloor(
+              newFloor
+            );
+
           }
-        );
+
+        }
+      );
 
 
-      document
-        .getElementById("nextFloor")
-        .addEventListener(
-          "click",
-          () => {
-            const index =
-              floors.indexOf(currentFloor);
+      /*
+        "+"
 
-            if (
-              index <
-              floors.length - 1
-            ) {
-              const newFloor =
-                floors[index - 1];
+        Tibia:
+        mniejsze z = wyżej
 
-              floorSelect.value =
-                newFloor;
+        7 -> 6
+        6 -> 5
+        ...
+        1 -> 0
+      */
+      nextFloorButton.addEventListener(
+        "click",
+        () => {
 
-              loadFloor(newFloor);
-            }
+          const index =
+            floors.indexOf(currentFloor);
+
+
+          if (index > 0) {
+
+            const newFloor =
+              floors[index - 1];
+
+            loadFloor(
+              newFloor
+            );
+
           }
-        );
+
+        }
+      );
 
 
+      /*
+        Współrzędne pod kursorem.
+      */
       map.on(
         "mousemove",
         event => {
+
           const floor =
             getFloorMeta(currentFloor);
+
 
           const pixelX =
             Math.floor(
@@ -391,6 +527,7 @@
             pixelX >= floor.width ||
             pixelY >= floor.height
           ) {
+
             coords.textContent =
               `x: -, y: -, z: ${currentFloor}`;
 
@@ -409,15 +546,21 @@
 
           coords.textContent =
             `x: ${gameX}, y: ${gameY}, z: ${currentFloor}`;
+
         }
       );
 
 
+      /*
+        Kliknięcie na mapę.
+      */
       map.on(
         "click",
         event => {
+
           const floor =
             getFloorMeta(currentFloor);
+
 
           const pixelX =
             Math.floor(
@@ -454,6 +597,7 @@
             y: gameY,
             z: currentFloor
           });
+
         }
       );
 
@@ -461,11 +605,16 @@
       map.on(
         "zoomend",
         () => {
+
           applyPixelRendering();
+
         }
       );
 
 
+      /*
+        Start.
+      */
       loadFloor(
         currentFloor,
         true
@@ -474,9 +623,12 @@
 
 
     init().catch(error => {
+
       console.error(error);
 
-      document.getElementById("map").innerHTML = `
+      document.getElementById(
+        "map"
+      ).innerHTML = `
         <div style="
           padding: 20px;
           color: red;
@@ -488,6 +640,7 @@
           ${error}
         </div>
       `;
+
     });
   </script>
 
