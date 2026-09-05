@@ -308,77 +308,84 @@
         <div id="panelControls">
 
           <label class="filterRow">
-
-            <input
-              type="checkbox"
-              id="toggleLavaHole"
-              checked
-            />
-
-            Lava holes
-
-            <span
-              class="filterCount"
-              id="lavaHoleCount"
-            ></span>
-
+            <input type="checkbox" id="toggleLavaHole" checked />
+            Lava Hole
+            <span class="filterCount" id="lavaHoleCount"></span>
           </label>
 
-
           <label class="filterRow">
-
-            <input
-              type="checkbox"
-              id="toggleMossyStone"
-              checked
-            />
-
-            Mossy stones
-
-            <span
-              class="filterCount"
-              id="mossyStoneCount"
-            ></span>
-
+            <input type="checkbox" id="toggleIceLavaHole" checked />
+            Ice Lava Hole
+            <span class="filterCount" id="iceLavaHoleCount"></span>
           </label>
 
-
           <label class="filterRow">
-
-            <input
-              type="checkbox"
-              id="toggleBlueShrineStone"
-              checked
-            />
-
-            Blue Shrine Stones
-
-            <span
-              class="filterCount"
-              id="blueShrineStoneCount"
-            ></span>
-
+            <input type="checkbox" id="toggleMossyStone" checked />
+            Mossy Stone
+            <span class="filterCount" id="mossyStoneCount"></span>
           </label>
 
+          <label class="filterRow">
+            <input type="checkbox" id="toggleBlueShrineStone" checked />
+            Blue Shrine Stone
+            <span class="filterCount" id="blueShrineStoneCount"></span>
+          </label>
 
           <label class="filterRow">
+            <input type="checkbox" id="toggleGreenShrineStone" checked />
+            Green Shrine Stone
+            <span class="filterCount" id="greenShrineStoneCount"></span>
+          </label>
 
-            <input
-              type="checkbox"
-              id="toggleIronOre"
-              checked
-            />
+          <label class="filterRow">
+            <input type="checkbox" id="toggleRedShrineStone" checked />
+            Red Shrine Stone
+            <span class="filterCount" id="redShrineStoneCount"></span>
+          </label>
 
+          <label class="filterRow">
+            <input type="checkbox" id="toggleVioletShrineStone" checked />
+            Violet Shrine Stone
+            <span class="filterCount" id="violetShrineStoneCount"></span>
+          </label>
+
+          <label class="filterRow">
+            <input type="checkbox" id="toggleYellowShrineStone" checked />
+            Yellow Shrine Stone
+            <span class="filterCount" id="yellowShrineStoneCount"></span>
+          </label>
+
+          <label class="filterRow">
+            <input type="checkbox" id="toggleIronOre" checked />
             Iron Ore
-
-            <span
-              class="filterCount"
-              id="ironOreCount"
-            ></span>
-
+            <span class="filterCount" id="ironOreCount"></span>
           </label>
 
-        </div>
+          <label class="filterRow">
+            <input type="checkbox" id="toggleCopperOre" checked />
+            Copper Ore
+            <span class="filterCount" id="copperOreCount"></span>
+          </label>
+
+          <label class="filterRow">
+            <input type="checkbox" id="toggleGoldOre" checked />
+            Gold Ore
+            <span class="filterCount" id="goldOreCount"></span>
+          </label>
+
+          <label class="filterRow">
+            <input type="checkbox" id="toggleMysticOre" checked />
+            Mystic Ore
+            <span class="filterCount" id="mysticOreCount"></span>
+          </label>
+
+          <label class="filterRow">
+            <input type="checkbox" id="toggleMythanOre" checked />
+            Mythan Ore
+            <span class="filterCount" id="mythanOreCount"></span>
+          </label>
+
+        </div>        </div>
 
       </div>
 
@@ -425,31 +432,33 @@
       document.getElementById("coordList");
 
 
-    const toggleLavaHole =
-      document.getElementById("toggleLavaHole");
+    const toggleLavaHole = document.getElementById("toggleLavaHole");
+    const toggleIceLavaHole = document.getElementById("toggleIceLavaHole");
+    const toggleMossyStone = document.getElementById("toggleMossyStone");
+    const toggleBlueShrineStone = document.getElementById("toggleBlueShrineStone");
+    const toggleGreenShrineStone = document.getElementById("toggleGreenShrineStone");
+    const toggleRedShrineStone = document.getElementById("toggleRedShrineStone");
+    const toggleVioletShrineStone = document.getElementById("toggleVioletShrineStone");
+    const toggleYellowShrineStone = document.getElementById("toggleYellowShrineStone");
+    const toggleIronOre = document.getElementById("toggleIronOre");
+    const toggleCopperOre = document.getElementById("toggleCopperOre");
+    const toggleGoldOre = document.getElementById("toggleGoldOre");
+    const toggleMysticOre = document.getElementById("toggleMysticOre");
+    const toggleMythanOre = document.getElementById("toggleMythanOre");
 
-    const toggleMossyStone =
-      document.getElementById("toggleMossyStone");
-    
-    const toggleBlueShrineStone =
-      document.getElementById("toggleBlueShrineStone");
-
-    const toggleIronOre =
-      document.getElementById("toggleIronOre");
-
-
-    const lavaHoleCount =
-      document.getElementById("lavaHoleCount");
-
-    const mossyStoneCount =
-      document.getElementById("mossyStoneCount");
-    
-    const blueShrineStoneCount =
-      document.getElementById("blueShrineStoneCount");
-
-    const ironOreCount =
-      document.getElementById("ironOreCount");
-
+    const lavaHoleCount = document.getElementById("lavaHoleCount");
+    const iceLavaHoleCount = document.getElementById("iceLavaHoleCount");
+    const mossyStoneCount = document.getElementById("mossyStoneCount");
+    const blueShrineStoneCount = document.getElementById("blueShrineStoneCount");
+    const greenShrineStoneCount = document.getElementById("greenShrineStoneCount");
+    const redShrineStoneCount = document.getElementById("redShrineStoneCount");
+    const violetShrineStoneCount = document.getElementById("violetShrineStoneCount");
+    const yellowShrineStoneCount = document.getElementById("yellowShrineStoneCount");
+    const ironOreCount = document.getElementById("ironOreCount");
+    const copperOreCount = document.getElementById("copperOreCount");
+    const goldOreCount = document.getElementById("goldOreCount");
+    const mysticOreCount = document.getElementById("mysticOreCount");
+    const mythanOreCount = document.getElementById("mythanOreCount");
 
     const MAP_VERSION =
       "20260905-9";
@@ -554,13 +563,37 @@
             x: 32591,
             y: 32645,
             z: 14
-          }
+          },
+          { x: 33428, y: 32063, z: 10 },
+          { x: 33436, y: 32066, z: 10 },
+          { x: 33479, y: 32266, z: 11 },
+          { x: 33478, y: 32265, z: 11 },
+          { x: 33481, y: 32264, z: 11 },
+          { x: 33485, y: 32266, z: 11 },
+          { x: 33487, y: 32265, z: 11 },
+          { x: 33485, y: 32263, z: 11 },
+          { x: 33460, y: 32264, z: 11 },
+          { x: 33462, y: 32262, z: 11 },
+          { x: 33461, y: 32261, z: 11 },
+          { x: 33459, y: 32259, z: 11 },
+          { x: 33458, y: 32261, z: 11 },
+          { x: 33457, y: 32263, z: 11 },
+          { x: 33454, y: 32262, z: 11 },
+          { x: 33454, y: 32259, z: 11 },
+          { x: 33451, y: 32259, z: 11 },
+          { x: 33456, y: 32256, z: 11 },
+          { x: 33438, y: 32239, z: 11 },
+          { x: 33448, y: 32249, z: 11 },
+          { x: 33453, y: 32252, z: 11 },
+          { x: 33456, y: 32249, z: 11 },
+          { x: 33461, y: 32236, z: 11 },
+          { x: 33458, y: 32080, z: 10 }
 
         ]
 
       },
 
-        blue_stone_shrine: {
+        blue_shrine_stone: {
 
         label:
           "Blue Shrine Stone",
@@ -588,7 +621,26 @@
             x: 32011,
             y: 32238,
             z: 4
-          }
+          },
+            { x: 33383, y: 31796, z: 4 },
+            { x: 33384, y: 31797, z: 4 },
+            { x: 33376, y: 32243, z: 11 },
+            { x: 33490, y: 32065, z: 10 },
+            { x: 33489, y: 32064, z: 10 },
+            { x: 33487, y: 32064, z: 10 },
+            { x: 33488, y: 32061, z: 10 },
+            { x: 33480, y: 32066, z: 10 },
+            { x: 33478, y: 32067, z: 10 },
+            { x: 33421, y: 32201, z: 11 },
+            { x: 33425, y: 32203, z: 11 },
+            { x: 33427, y: 32205, z: 11 },
+            { x: 33459, y: 32188, z: 11 },
+            { x: 33461, y: 32188, z: 11 },
+            { x: 33462, y: 32188, z: 11 },
+            { x: 33461, y: 32185, z: 11 },
+            { x: 33481, y: 32187, z: 11 },
+            { x: 33488, y: 32206, z: 11 },
+            { x: 33489, y: 32204, z: 11 }
 
         ]
 
@@ -615,12 +667,148 @@
         points: [
 
           { x: 32215, y: 32637, z: 6 },
-          { x: 32218, y: 32637, z: 6 }
+          { x: 32218, y: 32637, z: 6 },
+          { x: 33397, y: 32195, z: 11 },
+          { x: 33393, y: 32182, z: 11 },
+          { x: 33383, y: 32179, z: 11 },
+          { x: 33379, y: 32189, z: 11 },
+          { x: 33363, y: 32187, z: 11 },
+          { x: 33361, y: 32178, z: 11 },
+          { x: 33362, y: 32169, z: 11 },
+          { x: 33352, y: 32191, z: 11 },
+          { x: 33349, y: 32190, z: 11 },
+          { x: 33351, y: 32196, z: 11 },
+          { x: 33435, y: 32190, z: 11 },
+          { x: 33483, y: 32189, z: 11 }
 
         ]
 
       }
 
+
+,
+      ice_lava_hole: {
+        label: "Ice Lava Hole",
+        plural: "Ice Lava Holes",
+        icon: "./images/mining/ice_lava_hole.png",
+        checkbox: toggleIceLavaHole,
+        iconSize: [32, 32],
+        points: []
+      },
+
+      green_shrine_stone: {
+        label: "Green Shrine Stone",
+        plural: "Green Shrine Stones",
+        icon: "./images/mining/green_shrine_stone.png",
+        checkbox: toggleGreenShrineStone,
+        iconSize: [48, 48],
+        points: [  { x: 33376, y: 32117, z: 10 },
+            { x: 33378, y: 32113, z: 10 },
+            { x: 33374, y: 32114, z: 10 },
+            { x: 33372, y: 32114, z: 10 },
+            { x: 33371, y: 32116, z: 10 },
+            { x: 33424, y: 32236, z: 11 },
+            { x: 33406, y: 32227, z: 11 },
+            { x: 33381, y: 32243, z: 11 },
+            { x: 33390, y: 32260, z: 11 },
+            { x: 33363, y: 32264, z: 11 },
+            { x: 33376, y: 32275, z: 11 },
+            { x: 33402, y: 32270, z: 11 }
+          ]
+      },
+
+      red_shrine_stone: {
+        label: "Red Shrine Stone",
+        plural: "Red Shrine Stones",
+        icon: "./images/mining/red_shrine_stone.png",
+        checkbox: toggleRedShrineStone,
+        iconSize: [48, 48],
+        points: [  { x: 33400, y: 32201, z: 11 },
+                    { x: 33384, y: 32195, z: 11 },
+                    { x: 33375, y: 32193, z: 11 },
+                    { x: 33361, y: 32168, z: 11 },
+                    { x: 33368, y: 32171, z: 11 },
+                    { x: 33369, y: 32169, z: 11 },
+                    { x: 33371, y: 32173, z: 11 },
+                    { x: 33381, y: 32250, z: 11 }]
+      },
+
+      violet_shrine_stone: {
+        label: "Violet Shrine Stone",
+        plural: "Violet Shrine Stones",
+        icon: "./images/mining/violet_shrine_stone.png",
+        checkbox: toggleVioletShrineStone,
+        iconSize: [48, 48],
+        points: [  { x: 33393, y: 32058, z: 10 },
+                  { x: 33399, y: 32059, z: 10 },
+                  { x: 33416, y: 32068, z: 10 },
+                  { x: 33416, y: 32071, z: 10 },
+                  { x: 33400, y: 32094, z: 10 },
+                  { x: 33414, y: 32098, z: 10 },
+                  { x: 33416, y: 32093, z: 10 },
+                  { x: 33376, y: 32250, z: 11 }]
+      },
+
+      yellow_shrine_stone: {
+        label: "Yellow Shrine Stone",
+        plural: "Yellow Shrine Stones",
+        icon: "./images/mining/yellow_shrine_stone.png",
+        checkbox: toggleYellowShrineStone,
+        iconSize: [48, 48],
+        points: [  { x: 33461, y: 32265, z: 11 },
+                    { x: 33405, y: 32112, z: 10 },
+                    { x: 33412, y: 32115, z: 10 },
+                    { x: 33422, y: 32272, z: 11 },
+                    { x: 33424, y: 32271, z: 11 },
+                    { x: 33426, y: 32271, z: 11 },
+                    { x: 33415, y: 32247, z: 11 },
+                    { x: 33417, y: 32247, z: 11 },
+                    { x: 33449, y: 32086, z: 10 },
+                    { x: 33448, y: 32085, z: 10 },
+                    { x: 33450, y: 32082, z: 10 },
+                    { x: 33452, y: 32081, z: 10 },
+                    { x: 33453, y: 32080, z: 10 },
+                    { x: 33460, y: 32218, z: 11 },
+                    { x: 33461, y: 32216, z: 11 },
+                    { x: 33458, y: 32215, z: 11 }
+                  ]
+      },
+
+      copper_ore: {
+        label: "Copper Ore",
+        plural: "Copper Ore",
+        icon: "./images/mining/copper_ore.png",
+        checkbox: toggleCopperOre,
+        iconSize: [32, 32],
+        points: []
+      },
+
+      gold_ore: {
+        label: "Gold Ore",
+        plural: "Gold Ore",
+        icon: "./images/mining/gold_ore.png",
+        checkbox: toggleGoldOre,
+        iconSize: [32, 32],
+        points: []
+      },
+
+      mystic_ore: {
+        label: "Mystic Ore",
+        plural: "Mystic Ore",
+        icon: "./images/mining/mystic_ore.png",
+        checkbox: toggleMysticOre,
+        iconSize: [32, 32],
+        points: []
+      },
+
+      mythan_ore: {
+        label: "Mythan Ore",
+        plural: "Mythan Ore",
+        icon: "./images/mining/mythan_ore.png",
+        checkbox: toggleMythanOre,
+        iconSize: [32, 32],
+        points: []
+      }
 
 
 
@@ -1481,18 +1669,14 @@
       updateRashid();
 
 
-      lavaHoleCount.textContent =
-        `(${MINING_TYPES.lava_hole.points.length})`;
+      Object.entries(MINING_TYPES).forEach(([type, config]) => {
+        const camelType = type.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
+        const countElement = document.getElementById(`${camelType}Count`);
 
-
-      mossyStoneCount.textContent =
-        `(${MINING_TYPES.mossy_stone.points.length})`;
-
-      blueShrineStoneCount.textContent =
-        `(${MINING_TYPES.blue_stone_shrine.points.length})`;
-
-      ironOreCount.textContent =
-        `(${MINING_TYPES.iron_ore.points.length})`;
+        if (countElement) {
+          countElement.textContent = `(${config.points.length})`;
+        }
+      });
 
 
       const response =
@@ -1702,52 +1886,12 @@
         FILTERS
       */
 
-      toggleLavaHole
-        .addEventListener(
-          "change",
-          () => {
-
-            renderMiningMarkers();
-            renderMiningList();
-
-          }
-        );
-
-
-      toggleMossyStone
-        .addEventListener(
-          "change",
-          () => {
-
-            renderMiningMarkers();
-            renderMiningList();
-
-          }
-        );
-
-
-      toggleBlueShrineStone
-        .addEventListener(
-          "change",
-          () => {
-
-            renderMiningMarkers();
-            renderMiningList();
-
-          }
-        );
-
-
-      toggleIronOre
-        .addEventListener(
-          "change",
-          () => {
-
-            renderMiningMarkers();
-            renderMiningList();
-
-          }
-        );
+      Object.values(MINING_TYPES).forEach(config => {
+        config.checkbox.addEventListener("change", () => {
+          renderMiningMarkers();
+          renderMiningList();
+        });
+      });
 
 
       /*
