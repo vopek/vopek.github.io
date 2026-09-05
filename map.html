@@ -69,7 +69,6 @@
 
     #coords {
       margin-left: auto;
-
       font-family: monospace;
     }
 
@@ -82,12 +81,19 @@
       text-decoration: underline;
     }
 
-    /* NAJWAŻNIEJSZE:
-       bez interpolacji / blur przy zoomie */
+    /*
+      KLUCZOWE:
+      nearest-neighbor / brak blur
+    */
 
     .leaflet-image-layer {
-      image-rendering: pixelated;
-      image-rendering: crisp-edges;
+      image-rendering: crisp-edges !important;
+      image-rendering: pixelated !important;
+    }
+
+    .leaflet-pane img {
+      image-rendering: crisp-edges !important;
+      image-rendering: pixelated !important;
     }
 
     .leaflet-container {
@@ -126,12 +132,9 @@
 
   <div id="map"></div>
 
-  <script
-    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
-  </script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <script>
-
     let map;
     let overlay;
 
@@ -147,35 +150,17 @@
 
     async function init() {
 
-      /*
-       * GitHub Pages:
-       *
-       * map.html
-       * export/map_info.json
-       *
-       * dlatego używamy ścieżki względnej
-       */
-
       const response =
         await fetch("./export/map_info.json");
 
       if (!response.ok) {
         throw new Error(
-          "Cannot load export/map_info.json"
+          "Cannot load ./export/map_info.json"
         );
       }
 
       meta = await response.json();
 
-
-      /*
-       * map_info.json ma floors jako object:
-       *
-       * {
-       *   "7": {...},
-       *   "8": {...}
-       * }
-       */
 
       const floors =
         Object.keys(meta.floors)
@@ -184,24 +169,37 @@
 
 
       /*
-       * Leaflet Simple CRS:
-       *
-       * lng = X
-       * lat = Y
-       */
+        Leaflet Simple CRS.
+
+        Ważne:
+        zoomSnap = 1
+        zoomDelta = 1
+
+        Dzięki temu zoom idzie:
+        1x
+        2x
+        4x
+        8x
+        16x
+
+        zamiast pośrednich skal powodujących blur.
+      */
 
       map = L.map("map", {
 
         crs: L.CRS.Simple,
 
         minZoom: -4,
-        maxZoom: 8,
+        maxZoom: 10,
 
-        zoomSnap: 0.25,
+        zoomSnap: 1,
+        zoomDelta: 1,
 
-        zoomDelta: 0.25,
+        wheelPxPerZoomLevel: 120,
 
-        wheelPxPerZoomLevel: 80,
+        zoomAnimation: false,
+        fadeAnimation: false,
+        markerZoomAnimation: false,
 
         attributionControl: false
 
@@ -209,8 +207,8 @@
 
 
       /*
-       * Dropdown
-       */
+        Dodanie floorów do selecta.
+      */
 
       floors.forEach(z => {
 
@@ -228,9 +226,8 @@
 
 
       /*
-       * Startujemy na floor 7,
-       * jeśli istnieje.
-       */
+        Domyślnie floor 7.
+      */
 
       currentFloor =
         floors.includes(7)
@@ -253,17 +250,6 @@
         const floor =
           getFloorMeta(z);
 
-        /*
-         * Obraz ma:
-         *
-         * 0,0        width
-         *   ┌─────────┐
-         *   │         │
-         *   │         │
-         *   └─────────┘
-         *            height
-         */
-
         return [
           [0, 0],
           [
@@ -272,6 +258,35 @@
           ]
         ];
 
+      }
+
+
+      function applyPixelRendering() {
+
+        if (!overlay) {
+          return;
+        }
+
+        const image =
+          overlay.getElement();
+
+        if (!image) {
+          return;
+        }
+
+        image.style.imageRendering =
+          "pixelated";
+
+        /*
+          Dodatkowo wyłączamy
+          potencjalne transition.
+        */
+
+        image.style.transition =
+          "none";
+
+        image.style.willChange =
+          "transform";
       }
 
 
@@ -294,22 +309,16 @@
           );
 
 
-        /*
-         * Usuń stary floor.
-         */
-
         if (overlay) {
 
           map.removeLayer(
             overlay
           );
 
+          overlay = null;
+
         }
 
-
-        /*
-         * PNG
-         */
 
         overlay =
           L.imageOverlay(
@@ -319,7 +328,8 @@
             bounds,
 
             {
-              interactive: false
+              interactive: false,
+              opacity: 1
             }
 
           );
@@ -329,33 +339,30 @@
 
 
         /*
-         * Leaflet czasami ustawia transform,
-         * ale CSS pixelated powoduje,
-         * że nie będzie blur.
-         */
+          Po załadowaniu PNG
+          wymuszamy pixelated.
+        */
 
         overlay.once(
           "load",
           () => {
 
-            const element =
-              overlay.getElement();
-
-            if (element) {
-
-              element.style.imageRendering =
-                "pixelated";
-
-            }
+            applyPixelRendering();
 
           }
         );
 
 
         /*
-         * Przy pierwszym uruchomieniu
-         * dopasuj mapę.
-         */
+          Czasami element jest już dostępny
+          natychmiast po addTo().
+        */
+
+        setTimeout(
+          applyPixelRendering,
+          0
+        );
+
 
         if (fit) {
 
@@ -376,8 +383,8 @@
 
 
       /*
-       * FLOOR SELECT
-       */
+        FLOOR SELECT
+      */
 
       floorSelect.addEventListener(
         "change",
@@ -394,8 +401,8 @@
 
 
       /*
-       * FLOOR -
-       */
+        FLOOR -
+      */
 
       document
         .getElementById(
@@ -431,8 +438,8 @@
 
 
       /*
-       * FLOOR +
-       */
+        FLOOR +
+      */
 
       document
         .getElementById(
@@ -471,8 +478,8 @@
 
 
       /*
-       * COORDINATES
-       */
+        KOORDYNATY
+      */
 
       map.on(
         "mousemove",
@@ -484,20 +491,6 @@
             );
 
 
-          /*
-           * Leaflet:
-           *
-           * lng -> pixel X
-           * lat -> pixel Y
-           *
-           * Nasz PNG:
-           *
-           * pixel 0,0 odpowiada:
-           *
-           * min_x
-           * min_y
-           */
-
           const pixelX =
             Math.floor(
               event.latlng.lng
@@ -508,10 +501,6 @@
               event.latlng.lat
             );
 
-
-          /*
-           * poza PNG
-           */
 
           if (
             pixelX < 0 ||
@@ -545,9 +534,9 @@
 
 
       /*
-       * Kliknięcie = wypisz coords
-       * również do konsoli.
-       */
+        Kliknięcie:
+        wypisz coords do konsoli.
+      */
 
       map.on(
         "click",
@@ -557,6 +546,7 @@
             getFloorMeta(
               currentFloor
             );
+
 
           const pixelX =
             Math.floor(
@@ -568,6 +558,17 @@
               event.latlng.lat
             );
 
+
+          if (
+            pixelX < 0 ||
+            pixelY < 0 ||
+            pixelX >= floor.width ||
+            pixelY >= floor.height
+          ) {
+            return;
+          }
+
+
           const gameX =
             floor.min_x +
             pixelX;
@@ -575,6 +576,7 @@
           const gameY =
             floor.min_y +
             pixelY;
+
 
           console.log({
             x: gameX,
@@ -587,8 +589,26 @@
 
 
       /*
-       * Start.
-       */
+        Przy każdym zoomie jeszcze raz
+        wymuszamy pixelated.
+
+        Leaflet aktualizuje transform obrazu,
+        więc robimy to profilaktycznie.
+      */
+
+      map.on(
+        "zoomend",
+        () => {
+
+          applyPixelRendering();
+
+        }
+      );
+
+
+      /*
+        START
+      */
 
       loadFloor(
         currentFloor,
