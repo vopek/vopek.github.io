@@ -394,6 +394,9 @@
 
     const toggleMossyStone =
       document.getElementById("toggleMossyStone");
+    
+    const toggleBlueShrineStone =
+      document.getElementById("toggleBlueShrineStone");
 
 
     const lavaHoleCount =
@@ -401,6 +404,9 @@
 
     const mossyStoneCount =
       document.getElementById("mossyStoneCount");
+    
+    const blueShrineStoneCount =
+      document.getElementById("blueShrineStoneCount");
 
 
     const MAP_VERSION =
@@ -510,7 +516,45 @@
 
         ]
 
+      },
+
+        blue_stone_shrine: {
+
+        label:
+          "Blue Shrine Stone",
+
+        plural:
+          "Blue Shrine Stones ",
+
+        icon:
+          "./images/mining/blue_shrine_stone.png",
+
+        checkbox:
+          toggleBlueShrineStone,
+
+        iconSize:
+          [48, 48],
+
+        points: [
+
+          {
+            x: 32091,
+            y: 32243,
+            z: 5
+          },
+          {
+            x: 32011,
+            y: 32238,
+            z: 4
+          }
+
+        ]
+
       }
+
+
+
+
 
     };
 
@@ -1374,6 +1418,9 @@
 
       mossyStoneCount.textContent =
         `(${MINING_TYPES.mossy_stone.points.length})`;
+
+      blueShrineStoneCount.textContent =
+        `(${MINING_TYPES.blue_stone_shrine.points.length})`;
 
 
       const response =
