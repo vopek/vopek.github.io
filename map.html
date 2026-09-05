@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Miracle74 Map</title>
 
   <link
@@ -10,26 +12,41 @@
   />
 
   <style>
-    html, body {
+    html,
+    body {
       margin: 0;
+      width: 100%;
       height: 100%;
+      overflow: hidden;
+
       background: #111;
       color: white;
+
       font-family: Arial, sans-serif;
     }
 
     #toolbar {
       height: 50px;
+
       display: flex;
       align-items: center;
+
       gap: 12px;
+
       padding: 0 15px;
+
+      box-sizing: border-box;
+
       background: #1a1a1a;
+
+      position: relative;
+      z-index: 1000;
     }
 
     #map {
-      height: calc(100% - 50px);
       width: 100%;
+      height: calc(100% - 50px);
+
       background: #000;
     }
 
@@ -37,13 +54,23 @@
     button {
       background: #222;
       color: white;
+
       border: 1px solid #555;
+
       padding: 6px 10px;
+
       cursor: pointer;
+    }
+
+    button:hover,
+    select:hover {
+      background: #333;
     }
 
     #coords {
       margin-left: auto;
+
+      font-family: monospace;
     }
 
     a {
@@ -54,151 +81,548 @@
     a:hover {
       text-decoration: underline;
     }
+
+    /* NAJWAŻNIEJSZE:
+       bez interpolacji / blur przy zoomie */
+
+    .leaflet-image-layer {
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+
+    .leaflet-container {
+      background: #000;
+    }
   </style>
 </head>
 
 <body>
 
   <div id="toolbar">
-    <a href="index.html">← Wiki</a>
 
-    <label for="floorSelect">Floor:</label>
+    <a href="./index.html">
+      ← Wiki
+    </a>
+
+    <label for="floorSelect">
+      Floor:
+    </label>
 
     <select id="floorSelect"></select>
 
-    <button id="prevFloor">-</button>
-    <button id="nextFloor">+</button>
+    <button id="prevFloor">
+      -
+    </button>
+
+    <button id="nextFloor">
+      +
+    </button>
 
     <div id="coords">
       x: -, y: -, z: -
     </div>
+
   </div>
 
   <div id="map"></div>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+  </script>
 
   <script>
+
     let map;
     let overlay;
+
     let meta;
     let currentFloor;
 
-    async function init() {
-      meta = await fetch("./export/meta.json")
-        .then(response => response.json());
+    const floorSelect =
+      document.getElementById("floorSelect");
 
-      const bounds = [
-        [0, 0],
-        [meta.height, meta.width]
-      ];
+    const coords =
+      document.getElementById("coords");
+
+
+    async function init() {
+
+      /*
+       * GitHub Pages:
+       *
+       * map.html
+       * export/map_info.json
+       *
+       * dlatego używamy ścieżki względnej
+       */
+
+      const response =
+        await fetch("./export/map_info.json");
+
+      if (!response.ok) {
+        throw new Error(
+          "Cannot load export/map_info.json"
+        );
+      }
+
+      meta = await response.json();
+
+
+      /*
+       * map_info.json ma floors jako object:
+       *
+       * {
+       *   "7": {...},
+       *   "8": {...}
+       * }
+       */
+
+      const floors =
+        Object.keys(meta.floors)
+          .map(Number)
+          .sort((a, b) => a - b);
+
+
+      /*
+       * Leaflet Simple CRS:
+       *
+       * lng = X
+       * lat = Y
+       */
 
       map = L.map("map", {
+
         crs: L.CRS.Simple,
-        minZoom: -3,
-        maxZoom: 5,
-        zoomSnap: 0.25
+
+        minZoom: -4,
+        maxZoom: 8,
+
+        zoomSnap: 0.25,
+
+        zoomDelta: 0.25,
+
+        wheelPxPerZoomLevel: 80,
+
+        attributionControl: false
+
       });
 
-      map.fitBounds(bounds);
 
-      const floorSelect =
-        document.getElementById("floorSelect");
+      /*
+       * Dropdown
+       */
 
-      meta.floors.forEach(z => {
-        const option = document.createElement("option");
+      floors.forEach(z => {
+
+        const option =
+          document.createElement("option");
 
         option.value = z;
-        option.textContent = z;
+
+        option.textContent =
+          `Floor ${z}`;
 
         floorSelect.appendChild(option);
+
       });
 
+
+      /*
+       * Startujemy na floor 7,
+       * jeśli istnieje.
+       */
+
       currentFloor =
-        meta.floors.includes(7)
+        floors.includes(7)
           ? 7
-          : meta.floors[0];
+          : floors[0];
 
-      floorSelect.value = currentFloor;
+      floorSelect.value =
+        currentFloor;
 
-      function loadFloor(z) {
-        currentFloor = Number(z);
+
+      function getFloorMeta(z) {
+
+        return meta.floors[String(z)];
+
+      }
+
+
+      function getBounds(z) {
+
+        const floor =
+          getFloorMeta(z);
+
+        /*
+         * Obraz ma:
+         *
+         * 0,0        width
+         *   ┌─────────┐
+         *   │         │
+         *   │         │
+         *   └─────────┘
+         *            height
+         */
+
+        return [
+          [0, 0],
+          [
+            floor.height,
+            floor.width
+          ]
+        ];
+
+      }
+
+
+      function loadFloor(
+        z,
+        fit = false
+      ) {
+
+        currentFloor =
+          Number(z);
+
+        const floor =
+          getFloorMeta(
+            currentFloor
+          );
+
+        const bounds =
+          getBounds(
+            currentFloor
+          );
+
+
+        /*
+         * Usuń stary floor.
+         */
 
         if (overlay) {
-          map.removeLayer(overlay);
+
+          map.removeLayer(
+            overlay
+          );
+
         }
 
-        overlay = L.imageOverlay(
-          `./export/floor_${currentFloor}.png`,
-          bounds
-        );
+
+        /*
+         * PNG
+         */
+
+        overlay =
+          L.imageOverlay(
+
+            `./export/${floor.file}`,
+
+            bounds,
+
+            {
+              interactive: false
+            }
+
+          );
+
 
         overlay.addTo(map);
 
-        document.getElementById("coords")
-          .textContent =
+
+        /*
+         * Leaflet czasami ustawia transform,
+         * ale CSS pixelated powoduje,
+         * że nie będzie blur.
+         */
+
+        overlay.once(
+          "load",
+          () => {
+
+            const element =
+              overlay.getElement();
+
+            if (element) {
+
+              element.style.imageRendering =
+                "pixelated";
+
+            }
+
+          }
+        );
+
+
+        /*
+         * Przy pierwszym uruchomieniu
+         * dopasuj mapę.
+         */
+
+        if (fit) {
+
+          map.fitBounds(
+            bounds,
+            {
+              animate: false
+            }
+          );
+
+        }
+
+
+        coords.textContent =
           `x: -, y: -, z: ${currentFloor}`;
+
       }
+
+
+      /*
+       * FLOOR SELECT
+       */
 
       floorSelect.addEventListener(
         "change",
         event => {
-          loadFloor(event.target.value);
+
+          loadFloor(
+            Number(
+              event.target.value
+            )
+          );
+
         }
       );
 
-      document.getElementById("prevFloor")
-        .addEventListener("click", () => {
-          const index =
-            meta.floors.indexOf(currentFloor);
 
-          if (index > 0) {
-            const newFloor =
-              meta.floors[index - 1];
+      /*
+       * FLOOR -
+       */
 
-            floorSelect.value = newFloor;
+      document
+        .getElementById(
+          "prevFloor"
+        )
+        .addEventListener(
+          "click",
+          () => {
 
-            loadFloor(newFloor);
+            const index =
+              floors.indexOf(
+                currentFloor
+              );
+
+            if (index > 0) {
+
+              const newFloor =
+                floors[
+                  index - 1
+                ];
+
+              floorSelect.value =
+                newFloor;
+
+              loadFloor(
+                newFloor
+              );
+
+            }
+
           }
-        });
+        );
 
-      document.getElementById("nextFloor")
-        .addEventListener("click", () => {
-          const index =
-            meta.floors.indexOf(currentFloor);
 
-          if (index < meta.floors.length - 1) {
-            const newFloor =
-              meta.floors[index + 1];
+      /*
+       * FLOOR +
+       */
 
-            floorSelect.value = newFloor;
+      document
+        .getElementById(
+          "nextFloor"
+        )
+        .addEventListener(
+          "click",
+          () => {
 
-            loadFloor(newFloor);
+            const index =
+              floors.indexOf(
+                currentFloor
+              );
+
+            if (
+              index <
+              floors.length - 1
+            ) {
+
+              const newFloor =
+                floors[
+                  index + 1
+                ];
+
+              floorSelect.value =
+                newFloor;
+
+              loadFloor(
+                newFloor
+              );
+
+            }
+
           }
-        });
+        );
 
-      map.on("mousemove", event => {
-        const pixelX =
-          Math.round(event.latlng.lng);
 
-        const pixelY =
-          Math.round(event.latlng.lat);
+      /*
+       * COORDINATES
+       */
 
-        const gameX =
-          meta.originX + pixelX;
+      map.on(
+        "mousemove",
+        event => {
 
-        const gameY =
-          meta.originY + pixelY;
+          const floor =
+            getFloorMeta(
+              currentFloor
+            );
 
-        document.getElementById("coords")
-          .textContent =
-          `x: ${gameX}, y: ${gameY}, z: ${currentFloor}`;
-      });
 
-      loadFloor(currentFloor);
+          /*
+           * Leaflet:
+           *
+           * lng -> pixel X
+           * lat -> pixel Y
+           *
+           * Nasz PNG:
+           *
+           * pixel 0,0 odpowiada:
+           *
+           * min_x
+           * min_y
+           */
+
+          const pixelX =
+            Math.floor(
+              event.latlng.lng
+            );
+
+          const pixelY =
+            Math.floor(
+              event.latlng.lat
+            );
+
+
+          /*
+           * poza PNG
+           */
+
+          if (
+            pixelX < 0 ||
+            pixelY < 0 ||
+            pixelX >= floor.width ||
+            pixelY >= floor.height
+          ) {
+
+            coords.textContent =
+              `x: -, y: -, z: ${currentFloor}`;
+
+            return;
+
+          }
+
+
+          const gameX =
+            floor.min_x +
+            pixelX;
+
+          const gameY =
+            floor.min_y +
+            pixelY;
+
+
+          coords.textContent =
+            `x: ${gameX}, y: ${gameY}, z: ${currentFloor}`;
+
+        }
+      );
+
+
+      /*
+       * Kliknięcie = wypisz coords
+       * również do konsoli.
+       */
+
+      map.on(
+        "click",
+        event => {
+
+          const floor =
+            getFloorMeta(
+              currentFloor
+            );
+
+          const pixelX =
+            Math.floor(
+              event.latlng.lng
+            );
+
+          const pixelY =
+            Math.floor(
+              event.latlng.lat
+            );
+
+          const gameX =
+            floor.min_x +
+            pixelX;
+
+          const gameY =
+            floor.min_y +
+            pixelY;
+
+          console.log({
+            x: gameX,
+            y: gameY,
+            z: currentFloor
+          });
+
+        }
+      );
+
+
+      /*
+       * Start.
+       */
+
+      loadFloor(
+        currentFloor,
+        true
+      );
+
     }
 
-    init();
+
+    init().catch(error => {
+
+      console.error(error);
+
+      document.getElementById(
+        "map"
+      ).innerHTML = `
+
+        <div style="
+          padding: 20px;
+          color: red;
+        ">
+
+          Cannot load map.
+
+          <br><br>
+
+          ${error}
+
+        </div>
+
+      `;
+
+    });
+
   </script>
 
 </body>
