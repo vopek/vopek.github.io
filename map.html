@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Miracle74 Map</title>
+
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+
+  <style>
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: #111;
+      color: white;
+      font-family: Arial, sans-serif;
+    }
+
+    #toolbar {
+      height: 50px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 15px;
+      background: #1a1a1a;
+    }
+
+    #map {
+      height: calc(100% - 50px);
+      width: 100%;
+      background: #000;
+    }
+
+    select,
+    button {
+      background: #222;
+      color: white;
+      border: 1px solid #555;
+      padding: 6px 10px;
+      cursor: pointer;
+    }
+
+    #coords {
+      margin-left: auto;
+    }
+
+    a {
+      color: #00d4ff;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="toolbar">
+    <a href="index.html">← Wiki</a>
+
+    <label for="floorSelect">Floor:</label>
+
+    <select id="floorSelect"></select>
+
+    <button id="prevFloor">-</button>
+    <button id="nextFloor">+</button>
+
+    <div id="coords">
+      x: -, y: -, z: -
+    </div>
+  </div>
+
+  <div id="map"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script>
+    let map;
+    let overlay;
+    let meta;
+    let currentFloor;
+
+    async function init() {
+      meta = await fetch("./export/meta.json")
+        .then(response => response.json());
+
+      const bounds = [
+        [0, 0],
+        [meta.height, meta.width]
+      ];
+
+      map = L.map("map", {
+        crs: L.CRS.Simple,
+        minZoom: -3,
+        maxZoom: 5,
+        zoomSnap: 0.25
+      });
+
+      map.fitBounds(bounds);
+
+      const floorSelect =
+        document.getElementById("floorSelect");
+
+      meta.floors.forEach(z => {
+        const option = document.createElement("option");
+
+        option.value = z;
+        option.textContent = z;
+
+        floorSelect.appendChild(option);
+      });
+
+      currentFloor =
+        meta.floors.includes(7)
+          ? 7
+          : meta.floors[0];
+
+      floorSelect.value = currentFloor;
+
+      function loadFloor(z) {
+        currentFloor = Number(z);
+
+        if (overlay) {
+          map.removeLayer(overlay);
+        }
+
+        overlay = L.imageOverlay(
+          `./export/floor_${currentFloor}.png`,
+          bounds
+        );
+
+        overlay.addTo(map);
+
+        document.getElementById("coords")
+          .textContent =
+          `x: -, y: -, z: ${currentFloor}`;
+      }
+
+      floorSelect.addEventListener(
+        "change",
+        event => {
+          loadFloor(event.target.value);
+        }
+      );
+
+      document.getElementById("prevFloor")
+        .addEventListener("click", () => {
+          const index =
+            meta.floors.indexOf(currentFloor);
+
+          if (index > 0) {
+            const newFloor =
+              meta.floors[index - 1];
+
+            floorSelect.value = newFloor;
+
+            loadFloor(newFloor);
+          }
+        });
+
+      document.getElementById("nextFloor")
+        .addEventListener("click", () => {
+          const index =
+            meta.floors.indexOf(currentFloor);
+
+          if (index < meta.floors.length - 1) {
+            const newFloor =
+              meta.floors[index + 1];
+
+            floorSelect.value = newFloor;
+
+            loadFloor(newFloor);
+          }
+        });
+
+      map.on("mousemove", event => {
+        const pixelX =
+          Math.round(event.latlng.lng);
+
+        const pixelY =
+          Math.round(event.latlng.lat);
+
+        const gameX =
+          meta.originX + pixelX;
+
+        const gameY =
+          meta.originY + pixelY;
+
+        document.getElementById("coords")
+          .textContent =
+          `x: ${gameX}, y: ${gameY}, z: ${currentFloor}`;
+      });
+
+      loadFloor(currentFloor);
+    }
+
+    init();
+  </script>
+
+</body>
+</html>
