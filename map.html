@@ -342,6 +342,24 @@
 
           </label>
 
+
+          <label class="filterRow">
+
+            <input
+              type="checkbox"
+              id="toggleBlueShrineStone"
+              checked
+            />
+
+            Blue Shrine Stones
+
+            <span
+              class="filterCount"
+              id="blueShrineStoneCount"
+            ></span>
+
+          </label>
+
         </div>
 
       </div>
@@ -1643,6 +1661,18 @@
 
 
       toggleMossyStone
+        .addEventListener(
+          "change",
+          () => {
+
+            renderMiningMarkers();
+            renderMiningList();
+
+          }
+        );
+
+
+      toggleBlueShrineStone
         .addEventListener(
           "change",
           () => {
