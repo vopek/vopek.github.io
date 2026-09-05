@@ -360,6 +360,24 @@
 
           </label>
 
+
+          <label class="filterRow">
+
+            <input
+              type="checkbox"
+              id="toggleIronOre"
+              checked
+            />
+
+            Iron Ore
+
+            <span
+              class="filterCount"
+              id="ironOreCount"
+            ></span>
+
+          </label>
+
         </div>
 
       </div>
@@ -416,6 +434,9 @@
     const toggleBlueShrineStone =
       document.getElementById("toggleBlueShrineStone");
 
+    const toggleIronOre =
+      document.getElementById("toggleIronOre");
+
 
     const lavaHoleCount =
       document.getElementById("lavaHoleCount");
@@ -425,6 +446,9 @@
     
     const blueShrineStoneCount =
       document.getElementById("blueShrineStoneCount");
+
+    const ironOreCount =
+      document.getElementById("ironOreCount");
 
 
     const MAP_VERSION =
@@ -556,7 +580,7 @@
         points: [
 
           {
-            x: 32019,
+            x: 32091,
             y: 32243,
             z: 5
           },
@@ -565,6 +589,33 @@
             y: 32238,
             z: 4
           }
+
+        ]
+
+      },
+
+
+      iron_ore: {
+
+        label:
+          "Iron Ore",
+
+        plural:
+          "Iron Ore",
+
+        icon:
+          "./images/mining/iron_ore.png",
+
+        checkbox:
+          toggleIronOre,
+
+        iconSize:
+          [32, 32],
+
+        points: [
+
+          { x: 32215, y: 32637, z: 6 },
+          { x: 32218, y: 32637, z: 6 }
 
         ]
 
@@ -1440,6 +1491,9 @@
       blueShrineStoneCount.textContent =
         `(${MINING_TYPES.blue_stone_shrine.points.length})`;
 
+      ironOreCount.textContent =
+        `(${MINING_TYPES.iron_ore.points.length})`;
+
 
       const response =
         await fetch(
@@ -1673,6 +1727,18 @@
 
 
       toggleBlueShrineStone
+        .addEventListener(
+          "change",
+          () => {
+
+            renderMiningMarkers();
+            renderMiningList();
+
+          }
+        );
+
+
+      toggleIronOre
         .addEventListener(
           "change",
           () => {
