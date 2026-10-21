@@ -1,5 +1,10 @@
 # vopek.github.io
 
+After changing wiki scripts, styles or catalog data, run
+`python scripts/version-assets.py` before committing. It updates asset URLs on
+all monster/item pages using content hashes, so browsers fetch the new version
+after deployment, just as the map's versioned files do.
+
 Static Miracle74 wiki. Open `index.html` or serve the repository with any static
 HTTP server. The Monsters and Items catalogs support search and direct detail
 links. The current import contains 171 monsters and 389 items from the available
