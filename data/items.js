@@ -2518,5 +2518,208 @@ window.ITEMS = [
     "category": "tools",
     "sprite": "images/items/2230.gif",
     "source": "https://miracle74.com/images/items/2230.gif"
+  },
+  {
+    "id": "2145",
+    "name": "Small Diamond",
+    "category": "valuables",
+    "sprite": "images/items/2145.gif",
+    "source": "https://miracle74.com/images/items/2145.gif"
+  },
+  {
+    "id": "2208",
+    "name": "Axe Ring",
+    "category": "rings",
+    "sprite": "images/items/2208.gif",
+    "source": "https://miracle74.com/images/items/2208.gif"
+  },
+  {
+    "id": "2420",
+    "name": "Machete",
+    "category": "tools",
+    "sprite": "images/items/2420.gif",
+    "source": "https://miracle74.com/images/items/2420.gif"
+  },
+  {
+    "id": "2175",
+    "name": "Spellbook",
+    "category": "containers",
+    "sprite": "images/items/2175.gif",
+    "source": "https://miracle74.com/images/items/2175.gif"
+  },
+  {
+    "id": "7526",
+    "name": "Beholder's Book",
+    "category": "relics",
+    "sprite": "images/items/7526.gif",
+    "source": "https://miracle74.com/images/items/7526.gif"
+  },
+  {
+    "id": "2568",
+    "name": "Cleaver",
+    "category": "tools",
+    "sprite": "images/items/2568.gif",
+    "source": "https://miracle74.com/images/items/2568.gif"
+  },
+  {
+    "id": "2563",
+    "name": "Pan",
+    "category": "tools",
+    "sprite": "images/items/2563.gif",
+    "source": "https://miracle74.com/images/items/2563.gif"
+  },
+  {
+    "id": "2209",
+    "name": "Club Ring",
+    "category": "rings",
+    "sprite": "images/items/2209.gif",
+    "source": "https://miracle74.com/images/items/2209.gif"
+  },
+  {
+    "id": "2177",
+    "name": "Life Crystal",
+    "category": "valuables",
+    "sprite": "images/items/2177.gif",
+    "source": "https://miracle74.com/images/items/2177.gif"
+  },
+  {
+    "id": "2144",
+    "name": "Black Pearl",
+    "category": "valuables",
+    "sprite": "images/items/2144.gif",
+    "source": "https://miracle74.com/images/items/2144.gif"
+  },
+  {
+    "id": "2194",
+    "name": "Mysterious Fetish",
+    "category": "amulets",
+    "sprite": "images/items/2194.gif",
+    "source": "https://miracle74.com/images/items/2194.gif"
+  },
+  {
+    "id": "2546",
+    "name": "Burst Arrow",
+    "category": "ammunition",
+    "sprite": "images/items/2546.gif",
+    "source": "https://miracle74.com/images/items/2546.gif"
+  },
+  {
+    "id": "2543",
+    "name": "Bolt",
+    "category": "ammunition",
+    "sprite": "images/items/2543.gif",
+    "source": "https://miracle74.com/images/items/2543.gif"
+  },
+  {
+    "id": "2178",
+    "name": "Mind Stone",
+    "category": "valuables",
+    "sprite": "images/items/2178.gif",
+    "source": "https://miracle74.com/images/items/2178.gif"
+  },
+  {
+    "id": "2554",
+    "name": "Shovel",
+    "category": "tools",
+    "sprite": "images/items/2554.gif",
+    "source": "https://miracle74.com/images/items/2554.gif"
+  },
+  {
+    "id": "1949",
+    "name": "Scroll",
+    "category": "tools",
+    "sprite": "images/items/1949.gif",
+    "source": "https://miracle74.com/images/items/1949.gif"
+  },
+  {
+    "id": "2154",
+    "name": "Yellow Gem",
+    "category": "valuables",
+    "sprite": "images/items/2154.gif",
+    "source": "https://miracle74.com/images/items/2154.gif"
+  },
+  {
+    "id": "2600",
+    "name": "Inkwell",
+    "category": "tools",
+    "sprite": "images/items/2600.gif",
+    "source": "https://miracle74.com/images/items/2600.gif"
+  },
+  {
+    "id": "2032",
+    "name": "Bowl",
+    "category": "tools",
+    "sprite": "images/items/2032.gif",
+    "source": "https://miracle74.com/images/items/2032.gif"
+  },
+  {
+    "id": "2747",
+    "name": "Grave Flower",
+    "category": "tools",
+    "sprite": "images/items/2747.gif",
+    "source": "https://miracle74.com/images/items/2747.gif"
+  },
+  {
+    "id": "2260",
+    "name": "Blank Rune",
+    "category": "runes",
+    "sprite": "images/items/2260.gif",
+    "source": "https://miracle74.com/images/items/2260.gif"
+  },
+  {
+    "id": "5911",
+    "name": "Red Piece Of Cloth",
+    "category": "tools",
+    "sprite": "images/items/5911.gif",
+    "source": "https://miracle74.com/images/items/5911.gif"
+  },
+  {
+    "id": "2031",
+    "name": "Waterskin",
+    "category": "tools",
+    "sprite": "images/items/2031.gif",
+    "source": "https://miracle74.com/images/items/2031.gif"
+  },
+  {
+    "id": "2244",
+    "name": "Some Leaves",
+    "category": "tools",
+    "sprite": "images/items/2244.gif",
+    "source": "https://miracle74.com/images/items/2244.gif"
+  },
+  {
+    "id": "2245",
+    "name": "Twigs",
+    "category": "tools",
+    "sprite": "images/items/2245.gif",
+    "source": "https://miracle74.com/images/items/2245.gif"
+  },
+  {
+    "id": "2566",
+    "name": "Kitchen Knife",
+    "category": "tools",
+    "sprite": "images/items/2566.gif",
+    "source": "https://miracle74.com/images/items/2566.gif"
+  },
+  {
+    "id": "2545",
+    "name": "Poison Arrow",
+    "category": "ammunition",
+    "sprite": "images/items/2545.gif",
+    "source": "https://miracle74.com/images/items/2545.gif"
+  },
+  {
+    "id": "2802",
+    "name": "Sling Herb",
+    "category": "tools",
+    "sprite": "images/items/2802.gif",
+    "source": "https://miracle74.com/images/items/2802.gif"
+  },
+  {
+    "id": "2047",
+    "name": "Candlestick",
+    "category": "tools",
+    "sprite": "images/items/2047.gif",
+    "source": "https://miracle74.com/images/items/2047.gif"
   }
 ];

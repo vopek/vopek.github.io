@@ -3,3 +3,31 @@
 .card.has-loot{border-color:#4caa68;background:linear-gradient(#203c2a,#192b20);color:#a4e8b6}.card.has-loot:hover{border-color:#87dda0;background:#284c34}
 
 .card-stats{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 12px;font-size:12px;color:#bdbdbd}.has-loot .card-stats{color:#a4d6af}
+
+/* Compact monster details keep the stats and all loot tiers in view. */
+.monster-detail header{padding-top:12px;padding-bottom:12px}
+.monster-detail main{padding-top:10px;padding-bottom:10px}
+.monster-detail .back{margin:4px 0}
+.monster-detail .bestiary{margin-top:6px;padding:10px}
+.monster-detail .bestiary>h1{margin:0;padding-bottom:8px;font-size:19px}
+.monster-detail .overview{grid-template-columns:104px 1fr 1fr;gap:18px;margin:10px 0;align-items:start}
+.monster-detail h2{font-size:15px;margin:0 0 8px}
+.monster-detail .portrait{min-height:128px}
+.monster-detail .portrait .sprite{width:88px;height:88px}
+.monster-detail dl>div{padding:3px 0;font-size:13px;line-height:17px}
+.monster-detail .elements{gap:3px 16px}
+.monster-detail .element{padding:3px 0;font-size:13px;line-height:17px}
+.monster-detail .panel{padding:8px 10px;margin-top:8px}
+.monster-detail .loot-row{display:grid;grid-template-columns:88px minmax(0,1fr);gap:10px;padding:4px 0}
+.monster-detail .loot-row h3{width:auto;font-size:12px}
+.monster-detail .loot-slots{gap:4px}
+.monster-detail .slot{width:78px;padding:3px 4px;gap:2px;font-size:10px;line-height:12px}
+.monster-detail footer{margin-top:8px;padding-top:10px;padding-bottom:10px;font-size:11px}
+@media(max-width:700px){
+  .monster-detail header{gap:10px}
+  .monster-detail .overview{grid-template-columns:88px minmax(0,1fr);gap:12px}
+  .monster-detail .portrait{min-height:112px}
+  .monster-detail .portrait .sprite{width:76px;height:76px}
+  .monster-detail .loot-row{grid-template-columns:70px minmax(0,1fr);gap:6px}
+  .monster-detail .slot{width:70px}
+}

@@ -64,9 +64,23 @@ try {
     }
     throw new Error(`Page did not render: ${relative}`);
   }
+  await page('Emulation.setDeviceMetricsOverride', { width: 1366, height: 768, deviceScaleFactor: 1, mobile: false });
+  for (const id of ['barbarian-brute','dragon','cyclops','demon-skeleton','elf-arcanist','elf-scout']) {
+    await navigate(`monsters.html?monster=${id}`, '.bestiary');
+    const size = await evaluate('({height:document.documentElement.scrollHeight,width:document.documentElement.scrollWidth,viewportHeight:innerHeight,viewportWidth:innerWidth})');
+    assert(size.height <= size.viewportHeight, `${id} needs vertical scrolling at 1366x768: ${size.height}`);
+    assert(size.width <= size.viewportWidth, `${id} needs horizontal scrolling`);
+    if (process.env.WIKI_SCREENSHOT && id === 'barbarian-brute') {
+      const { data } = await page('Page.captureScreenshot', { format: 'png' });
+      await writeFile(process.env.WIKI_SCREENSHOT, Buffer.from(data, 'base64'));
+    }
+  }
   await navigate('monsters.html', '.card');
   const monsterCount = await evaluate('document.querySelectorAll(".card").length');
   assert(monsterCount >= 171);
+  for (const id of ['barbarian-dothraki','barbarian-guard','beholder','cave-rat','crypt-shambler','cyclops','demon-skeleton','dragon','dwarf-soldier','elf-arcanist','elf-scout','frost-spider','frost-troll']) {
+    assert.equal(await evaluate(`!!document.querySelector('a.has-loot[href="monsters.html?monster=${id}"] .card-stats')`), true);
+  }
   assert.equal(await evaluate(`document.querySelector('#search').value='elf'; document.querySelector('#search').dispatchEvent(new Event('input')); [...document.querySelectorAll('.card')].every(card=>card.textContent.toLowerCase().includes('elf'))`), true);
   assert.equal(await evaluate(`document.querySelector('#search').value='no-such-creature'; document.querySelector('#search').dispatchEvent(new Event('input')); !document.querySelector('#empty').hidden && document.querySelectorAll('.card').length===0`), true);
   await navigate('monsters.html?monster=elf', '.bestiary');
@@ -76,10 +90,6 @@ try {
     ['Red Apple', 'Arrow', 'Studded Helmet', 'Leather Boots', 'Studded Armor', 'Longsword', 'Brass Shield']);
   assert.equal(await evaluate(`Promise.all([...document.querySelectorAll('.slot img')].map(img=>img.decode().then(()=>img.naturalWidth>0).catch(()=>false))).then(results=>results.every(Boolean))`), true);
   assert.equal(await evaluate(`!!document.querySelector('svg.sprite image[href="images/monsters/elf.gif"]')`), true);
-  if (process.env.WIKI_SCREENSHOT) {
-    const { data } = await page('Page.captureScreenshot', { format: 'png', captureBeyondViewport: true });
-    await writeFile(process.env.WIKI_SCREENSHOT, Buffer.from(data, 'base64'));
-  }
   await page('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
   assert.equal(await evaluate('document.documentElement.scrollWidth <= innerWidth'), true);
   await navigate('monsters.html?monster=amazon', '.bestiary');
@@ -91,6 +101,31 @@ try {
   assert.equal(await evaluate(`Promise.all([...document.querySelectorAll('.slot img')].map(img=>img.decode().then(()=>img.naturalWidth>0).catch(()=>false))).then(results=>results.every(Boolean))`), true);
   assert.equal(await evaluate(`[...document.querySelectorAll('.element')].every(element=>element.lastElementChild.textContent==='No')`), true);
   assert.equal(await evaluate('document.documentElement.scrollWidth <= innerWidth'), true);
+  for (const [id, hp, exp, lootCount, earthResistance, fireResistance = 'No', energyResistance = 'No'] of [
+    ['barbarian-dothraki','135','75',7,'No'],
+    ['barbarian-guard','265','165',10,'Yes'],
+    ['beholder','260','170',9,'Yes'],
+    ['cave-rat','30','10',3,'No'],
+    ['crypt-shambler','330','195',9,'Yes'],
+    ['cyclops','260','150',10,'No'],
+    ['demon-skeleton','400','240',9,'Yes','Yes'],
+    ['dragon','1000','700',20,'Yes','Yes'],
+    ['dwarf-soldier','135','70',10,'Yes'],
+    ['elf-arcanist','220','175',18,'Yes','Yes','Yes'],
+    ['elf-scout','160','75',12,'Yes'],
+    ['frost-spider','20','12',1,'No'],
+    ['frost-troll','55','23',8,'No']
+  ]) {
+    await navigate(`monsters.html?monster=${id}`, '.bestiary');
+    assert.equal(await evaluate('document.querySelector("dl dd").textContent'), hp);
+    assert.equal(await evaluate('document.querySelectorAll("dl dd")[1].textContent'), exp);
+    assert.equal(await evaluate('document.querySelectorAll(".slot img").length'), lootCount);
+    assert.equal(await evaluate(`[...document.querySelectorAll('.element')].find(element=>element.firstElementChild.textContent==='Earth').lastElementChild.textContent`), earthResistance);
+    assert.equal(await evaluate(`[...document.querySelectorAll('.element')].find(element=>element.firstElementChild.textContent==='Fire').lastElementChild.textContent`), fireResistance);
+    assert.equal(await evaluate(`[...document.querySelectorAll('.element')].find(element=>element.firstElementChild.textContent==='Energy').lastElementChild.textContent`), energyResistance);
+    assert.equal(await evaluate(`Promise.all([...document.querySelectorAll('.slot img')].map(img=>img.decode().then(()=>img.naturalWidth>0).catch(()=>false))).then(results=>results.every(Boolean))`), true);
+    assert.equal(await evaluate('document.documentElement.scrollWidth <= innerWidth'), true);
+  }
   await navigate('items.html', '.card');
   const itemCount = await evaluate('document.querySelectorAll(".card").length');
   assert(itemCount >= 330);

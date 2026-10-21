@@ -2,7 +2,7 @@
 
 Static Miracle74 wiki. Open `index.html` or serve the repository with any static
 HTTP server. The Monsters and Items catalogs support search and direct detail
-links. The current import contains 171 monsters and 360 items from the available
+links. The current import contains 171 monsters and 389 items from the available
 equipment, food, amulet and selected loot catalogs. All catalog sprites are stored locally under
 `images/monsters/` and `images/items/`; browsing needs no connection to Miracle74.
 Monster animation bounds are measured across all frames to center the visible
@@ -38,3 +38,20 @@ are player-specific and are not presented as monster attributes.
 
 Amazon statistics, resistances and ten loot items across four rarity groups were
 transcribed from its bestiary screenshot. Locations remain omitted.
+
+Barbarian Brute: statistics, resistances and eleven loot items across five rarity
+groups added from screenshots; Small Diamond was confirmed by the user.
+
+Barbarian Dothraki, Barbarian Guard, Beholder, Cave Rat and Crypt Shambler were
+added from bestiary screenshots. Tiny drops were confirmed by the user: Guard
+(Small Diamond, Axe Ring), Cave Rat (Cookie), Crypt Shambler (Small Diamond).
+
+Cyclops, Demon Skeleton and Dragon added from screenshots, including Very Rare
+loot. User confirmed Club Ring, Life Crystal, Mysterious Fetish and Dragon
+Uncommon Gold Coin. Gold Coin remains excluded from item drop-source lists.
+
+Demon Skeleton Very Rare loot corrected to Mind Stone (user confirmation).
+
+Dwarf Soldier, Elf Arcanist, Elf Scout, Frost Spider and Frost Troll added from
+bestiary screenshots. Unclear drops were confirmed by the user, including
+Sling Herb, Scroll, Yellow Gem, Red Piece Of Cloth, Waterskin and Twigs.

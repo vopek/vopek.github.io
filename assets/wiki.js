@@ -18,6 +18,34 @@
   const itemLink = entry => entry.name.toLowerCase() === 'bone' ? `${prefix}items/bone.html` : `${prefix}items.html?item=${encodeURIComponent(entry.id)}`;
   // Monster values transcribed from the supplied bestiary screenshots.
   const stats = {
+    'dwarf-soldier': {hp:135, exp:70, speed:176, armor:9, charm:15,
+      resistances: {Physical:false, Earth:true, Fire:false, Energy:false, Ice:false, Holy:false, Death:false, Healing:false}},
+    'elf-arcanist': {hp:220, exp:175, speed:220, armor:15, charm:20,
+      resistances: {Physical:false, Earth:true, Fire:true, Energy:true, Ice:false, Holy:false, Death:false, Healing:false}},
+    'elf-scout': {hp:160, exp:75, speed:220, armor:7, charm:15,
+      resistances: {Physical:false, Earth:true, Fire:false, Energy:false, Ice:false, Holy:false, Death:false, Healing:false}},
+    'frost-spider': {hp:20, exp:12, speed:152, armor:3, charm:5,
+      resistances: {Physical:false, Earth:false, Fire:false, Energy:false, Ice:false, Holy:false, Death:false, Healing:false}},
+    'frost-troll': {hp:55, exp:23, speed:140, armor:7, charm:15,
+      resistances: {Physical:false, Earth:false, Fire:false, Energy:false, Ice:false, Holy:false, Death:false, Healing:false}},
+    cyclops: {hp:260, exp:150, speed:190, armor:17, charm:20,
+      resistances: {Physical:false, Earth:false, Fire:false, Energy:false, Ice:false, Holy:false, Death:false, Healing:false}},
+    'demon-skeleton': {hp:400, exp:240, speed:180, armor:25, charm:25,
+      resistances: {Physical:false, Earth:true, Fire:true, Energy:false, Ice:false, Holy:false, Death:false, Healing:false}},
+    dragon: {hp:1000, exp:700, speed:170, armor:25, charm:30,
+      resistances: {Physical:false, Earth:true, Fire:true, Energy:false, Ice:false, Holy:false, Death:false, Healing:false}},
+    'barbarian-dothraki': {hp:135, exp:75, speed:172, armor:12, charm:15,
+      resistances: {Physical:false, Earth:false, Fire:false, Energy:false, Ice:false, Holy:false, Death:false, Healing:false}},
+    'barbarian-guard': {hp:265, exp:165, speed:206, armor:15, charm:15,
+      resistances: {Physical:false, Earth:true, Fire:false, Energy:false, Ice:false, Holy:false, Death:false, Healing:false}},
+    beholder: {hp:260, exp:170, speed:150, armor:5, charm:20,
+      resistances: {Physical:false, Earth:true, Fire:false, Energy:false, Ice:false, Holy:false, Death:false, Healing:false}},
+    'cave-rat': {hp:30, exp:10, speed:150, armor:1, charm:5,
+      resistances: {Physical:false, Earth:false, Fire:false, Energy:false, Ice:false, Holy:false, Death:false, Healing:false}},
+    'crypt-shambler': {hp:330, exp:195, speed:140, armor:30, charm:20,
+      resistances: {Physical:false, Earth:true, Fire:false, Energy:false, Ice:false, Holy:false, Death:false, Healing:false}},
+    'barbarian-brute': {hp:230, exp:150, speed:190, armor:15, charm:15,
+      resistances: {Physical:false, Earth:false, Fire:false, Energy:false, Ice:false, Holy:false, Death:false, Healing:false}},
     amazon: {hp:110, exp:60, speed:172, armor:11, charm:15,
       resistances: {Physical:false, Earth:false, Fire:false, Energy:false, Ice:false, Holy:false, Death:false, Healing:false}},
     elf: {hp:100, exp:42, speed:190, armor:6, charm:15,
@@ -27,14 +55,82 @@
   };
   const unknown = '<span class="empty">No data</span>';
   function detail(entry) {
+    document.body.classList.add('monster-detail');
     document.title = `${entry.name} - Miracle74 Wiki`;
     const data = stats[entry.id] || {};
     const fields = [['Health',data.hp],['Experience',data.exp],['Speed',data.speed],['Armor',data.armor],['Bestiary points',data.charm]];
-    root.innerHTML = `<a class="back" href="${prefix}monsters.html">← Back to Monsters</a><article class="bestiary"><h1>${escape(entry.name)}</h1><div class="overview"><div class="portrait">${img(entry)}</div><section><h2>Basic information</h2><dl>${fields.map(([label,value])=>`<div><dt>${label}</dt><dd>${value ?? unknown}</dd></div>`).join('')}</dl></section><section><h2>Resistances</h2><div class="elements">${['Physical','Earth','Fire','Energy','Ice','Holy','Death','Healing'].map(name=>`<div class="element"><span>${name}</span>${data.resistances?.[name] == null ? unknown : `<span>${data.resistances[name] ? 'Yes' : 'No'}</span>`}</div>`).join('')}</div>${data.resistances ? '' : '<p class="muted">No resistance values supplied yet.</p>'}</section></div><section class="panel"><h2>Loot</h2>${loot(entry)}</section>${['elf','amazon','skeleton'].includes(entry.id) ? '' : `<p class="muted">${escape(data.note || 'Monster statistics and loot have not been supplied yet.')}</p>`}</article>`;
+    root.innerHTML = `<a class="back" href="${prefix}monsters.html">← Back to Monsters</a><article class="bestiary"><h1>${escape(entry.name)}</h1><div class="overview"><div class="portrait">${img(entry)}</div><section><h2>Basic information</h2><dl>${fields.map(([label,value])=>`<div><dt>${label}</dt><dd>${value ?? unknown}</dd></div>`).join('')}</dl></section><section><h2>Resistances</h2><div class="elements">${['Physical','Earth','Fire','Energy','Ice','Holy','Death','Healing'].map(name=>`<div class="element"><span>${name}</span>${data.resistances?.[name] == null ? unknown : `<span>${data.resistances[name] ? 'Yes' : 'No'}</span>`}</div>`).join('')}</div>${data.resistances ? '' : '<p class="muted">No resistance values supplied yet.</p>'}</section></div><section class="panel"><h2>Loot</h2>${loot(entry)}</section>${stats[entry.id] ? '' : `<p class="muted">${escape(data.note || 'Monster statistics and loot have not been supplied yet.')}</p>`}</article>`;
   }
   function lootGroups(entry) {
     // Loot names and rarity groups matched against the supplied bestiary screenshots.
-    return entry.id === 'amazon' ? {
+    return entry.id === 'dwarf-soldier' ? {
+      'Common':['White Mushroom','Gold Coin','Bolt'],
+      'Uncommon':['Shovel','Soldier Helmet'],
+      'Semi-Rare':['Chain Armor','Battle Axe','Dwarven Shield','Crossbow'],
+      'Very Rare':['Axe Ring']
+    } : entry.id === 'elf-arcanist' ? {
+      'Common':['Scroll','Sandals'],
+      'Uncommon':['Melon','Bread','Arrow','Inkwell','Bowl','Grave Flower','Blank Rune','Green Tunic','Candlestick','Staff'],
+      'Semi-Rare':['Sling Herb','Red Piece Of Cloth','Elven Amulet'],
+      'Rare':['Life Crystal'],
+      'Very Rare':['Yellow Gem','Red Robe']
+    } : entry.id === 'elf-scout' ? {
+      'Common':['Gold Coin','Arrow'],
+      'Uncommon':['Grapes','Poison Arrow','Waterskin','Sandals','Studded Helmet','Studded Armor','Longsword'],
+      'Semi-Rare':['Bow'],
+      'Very Rare':['Quiver','Wood Cape']
+    } : entry.id === 'frost-spider' ? {
+      'Common':['Gold Coin']
+    } : entry.id === 'frost-troll' ? {
+      'Common':['Gold Coin'],
+      'Uncommon':['Fish','Twigs','Coat','Spear','Rapier','Club','Wooden Shield']
+    } : entry.id === 'cyclops' ? {
+      'Common':['Meat','Gold Coin'],
+      'Uncommon':['Ham','Short Sword'],
+      'Semi-Rare':['Plate Shield','Battle Shield'],
+      'Rare':['Halberd'],
+      'Very Rare':['Dark Helmet','Wolf Tooth Chain','Club Ring']
+    } : entry.id === 'demon-skeleton' ? {
+      'Common':['Gold Coin','Torch'],
+      'Uncommon':['Throwing Star'],
+      'Semi-Rare':['Iron Helmet','Battle Hammer'],
+      'Rare':['Mysterious Fetish','Battle Shield'],
+      'Very Rare':['Mind Stone','Guardian Shield']
+    } : entry.id === 'dragon' ? {
+      'Common':['Dragon Ham','Gold Coin'],
+      'Uncommon':['Gold Coin','Burst Arrow','Crossbow','Short Sword','Mace','Steel Shield'],
+      'Semi-Rare':['Royal Spear','Steel Helmet','Plate Armor','Longsword','Broadsword'],
+      'Rare':['Small Diamond','Double Axe','Dragon Hammer','Serpent Sword','Dragon Shield'],
+      'Very Rare':['Life Crystal','Dragon Quiver']
+    } : entry.id === 'barbarian-dothraki' ? {
+      'Common':['Gold Coin','Leather Armor','Cleaver'],
+      'Uncommon':['Bread','Hand Axe'],
+      'Semi-Rare':['Torch','Wooden Shield']
+    } : entry.id === 'barbarian-guard' ? {
+      'Common':['Meat','Gold Coin','Cleaver'],
+      'Uncommon':['Chain Armor'],
+      'Semi-Rare':['Viking Helmet','Torch','Battle Axe','Dwarven Shield'],
+      'Very Rare':['Small Diamond','Axe Ring']
+    } : entry.id === 'beholder' ? {
+      'Common':['Gold Coin'],
+      'Uncommon':['Longsword','Morning Star'],
+      'Semi-Rare':['Two Handed Sword','Steel Shield','Wooden Shield','Spellbook'],
+      'Very Rare':['Beholder Shield',"Beholder's Book"]
+    } : entry.id === 'cave-rat' ? {
+      'Common':['Cheese','Gold Coin'],
+      'Rare':['Cookie']
+    } : entry.id === 'crypt-shambler' ? {
+      'Common':['Gold Coin','Bone'],
+      'Uncommon':['Meat'],
+      'Semi-Rare':['Iron Helmet','Two Handed Sword'],
+      'Rare':['Small Diamond','Throwing Star','Bone Sword','Bone Shield']
+    } : entry.id === 'barbarian-brute' ? {
+      'Common':['Gold Coin','Meat','Skull'],
+      'Uncommon':['Ham','Chain Armor','Axe'],
+      'Semi-Rare':['Chain Legs','Chain Helmet'],
+      'Rare':['Plate Armor','Double Axe'],
+      'Very Rare':['Small Diamond']
+    } : entry.id === 'amazon' ? {
       'Common':['Brown Bread','Gold Coin','Skull','Leather Armor','Dagger'],
       'Uncommon':['Sabre'],
       'Semi-Rare':['Torch','Studded Shield'],
@@ -53,15 +149,24 @@
       return item ? `<a class="slot" href="${itemLink(item)}" title="${escape(name)}">${img(item,true)}<span>${escape(name)}</span></a>` : name==='Bone' ? `<a class="slot" href="${prefix}items/bone.html"><span class="empty">?</span><span>Bone</span></a>` : `<span class="slot" title="Sprite unavailable"><span class="empty">?</span><span>${escape(name)}</span></span>`;
     }).join('')}</div></div>`).join('');
   }
+  function itemLootedBy(name) {
+    if (name.toLowerCase() === 'gold coin') return '';
+    const drops = monsters.flatMap(monster => Object.entries(lootGroups(monster))
+      .filter(([, names]) => names.some(item => item.toLowerCase() === name.toLowerCase()))
+      .map(([rarity]) => ({monster, rarity})))
+      .sort((a, b) => a.monster.name.localeCompare(b.monster.name));
+    if (!drops.length) return '';
+    return `<section><h2>Looted by:</h2><ul>${drops.map(({monster, rarity}) => `<li><a href="${monsterLink(monster)}">${escape(monster.name)}</a> (${escape(rarity)})</li>`).join('')}</ul></section>`;
+  }
   function itemDetail(entry) {
     document.title = `${entry.name} - Miracle74 Wiki`;
-    root.innerHTML=`<a class="back" href="${prefix}items.html">← Back to Items</a><article class="panel"><h1>${escape(entry.name)}</h1>${img(entry,true)}<p>Category: ${escape(entry.category)}</p><a href="https://miracle74.com/?subtopic=items&amp;id=${encodeURIComponent(entry.id)}" target="_blank" rel="noopener">View on Miracle74 ↗</a>${entry.name.toLowerCase()==='bone'?`<h2>Dropped by</h2><a href="${prefix}monsters/skeleton.html">Skeleton</a>`:''}</article>`;
+    root.innerHTML=`<a class="back" href="${prefix}items.html">← Back to Items</a><article class="panel"><h1>${escape(entry.name)}</h1>${img(entry,true)}<p>Category: ${escape(entry.category)}</p><a href="https://miracle74.com/?subtopic=items&amp;id=${encodeURIComponent(entry.id)}" target="_blank" rel="noopener">View on Miracle74 ↗</a>${itemLootedBy(entry.name)}</article>`;
   }
   const params = new URLSearchParams(location.search);
   const monsterId = document.body.dataset.monster || params.get('monster');
   const itemId = document.body.dataset.item || params.get('item');
   if (itemId === 'bone' && !items.some(item=>item.name.toLowerCase()==='bone')) {
-    root.innerHTML=`<a class="back" href="${prefix}items.html">← Back to Items</a><article class="panel"><h1>Bone</h1><p class="muted">Sprite not yet available in the imported catalog.</p><h2>Dropped by</h2><a href="${prefix}monsters/skeleton.html">Skeleton</a></article>`;
+    root.innerHTML=`<a class="back" href="${prefix}items.html">← Back to Items</a><article class="panel"><h1>Bone</h1><p class="muted">Sprite not yet available in the imported catalog.</p>${itemLootedBy('Bone')}</article>`;
     return;
   }
   if (monsterId || itemId) {
